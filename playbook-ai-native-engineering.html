@@ -1,0 +1,2230 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Playbook AI-Native Engineering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..750;1,14..32,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js"
+      crossorigin="anonymous"
+      defer
+    ></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg-deep: #08090a;
+        --bg-panel: #0f1011;
+        --bg-surface: #171819;
+        --bg-elevated: #24252a;
+        --text-primary: #f7f8f8;
+        --text-secondary: #d0d6e0;
+        --text-muted: #9298a3;
+        --text-subtle: #686d76;
+        --brand: #5e6ad2;
+        --accent: #7170ff;
+        --accent-soft: rgba(113, 112, 255, 0.12);
+        --green: #27a644;
+        --yellow: #e2a84b;
+        --red: #f06464;
+        --blue: #55a7ff;
+        --border-subtle: rgba(255, 255, 255, 0.05);
+        --border-std: rgba(255, 255, 255, 0.09);
+        --border-strong: rgba(255, 255, 255, 0.14);
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        font-family:
+          'Inter',
+          'SF Pro Display',
+          -apple-system,
+          BlinkMacSystemFont,
+          system-ui,
+          sans-serif;
+        font-feature-settings: 'cv01', 'ss03';
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(circle at 50% 40%, #000 0, transparent 72%);
+        opacity: 0.55;
+      }
+
+      .slides-wrap {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 54px 80px 64px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(56px);
+        transition:
+          opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .slide.active {
+        opacity: 1;
+        pointer-events: all;
+        transform: translateY(0);
+      }
+
+      .slide.exit-up {
+        opacity: 0;
+        transform: translateY(-56px);
+      }
+
+      .slide.exit-down {
+        opacity: 0;
+        transform: translateY(56px);
+      }
+
+      .slide-inner {
+        width: 100%;
+        max-width: 990px;
+      }
+
+      .slide-inner.wide {
+        max-width: 1120px;
+      }
+
+      .slide-inner.narrow {
+        max-width: 760px;
+      }
+
+      .stagger > * {
+        opacity: 0;
+      }
+
+      .slide.active .stagger > * {
+        animation: staggerIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .slide.active .stagger > *:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .slide.active .stagger > *:nth-child(2) {
+        animation-delay: 0.13s;
+      }
+      .slide.active .stagger > *:nth-child(3) {
+        animation-delay: 0.21s;
+      }
+      .slide.active .stagger > *:nth-child(4) {
+        animation-delay: 0.29s;
+      }
+      .slide.active .stagger > *:nth-child(5) {
+        animation-delay: 0.37s;
+      }
+      .slide.active .stagger > *:nth-child(6) {
+        animation-delay: 0.45s;
+      }
+
+      @keyframes staggerIn {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .progress-bar {
+        position: fixed;
+        right: 28px;
+        top: 50%;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(-50%);
+      }
+
+      .progress-dot {
+        width: 6px;
+        height: 6px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+        cursor: pointer;
+        transition:
+          background 0.25s,
+          transform 0.25s,
+          box-shadow 0.25s;
+      }
+
+      .progress-dot:hover {
+        background: rgba(255, 255, 255, 0.42);
+        transform: scale(1.35);
+      }
+
+      .progress-dot.active {
+        background: var(--accent);
+        box-shadow: 0 0 10px rgba(113, 112, 255, 0.5);
+        transform: scale(1.5);
+      }
+
+      .progress-counter {
+        margin-top: 6px;
+        color: var(--text-subtle);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1.5;
+        text-align: center;
+      }
+
+      .nav-arrows {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        z-index: 100;
+        display: flex;
+        gap: 10px;
+        transform: translateX(-50%);
+      }
+
+      .nav-btn {
+        display: flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-std);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition:
+          background 0.25s,
+          border-color 0.25s,
+          color 0.25s,
+          transform 0.25s;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        border-color: rgba(113, 112, 255, 0.35);
+        background: rgba(113, 112, 255, 0.12);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.28;
+        cursor: default;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 20px;
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 620;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      h1.display {
+        max-width: 960px;
+        margin-bottom: 22px;
+        font-size: clamp(42px, 6.3vw, 82px);
+        font-weight: 720;
+        letter-spacing: -0.04em;
+        line-height: 0.98;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        font-size: clamp(31px, 4vw, 52px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.04;
+      }
+
+      h3 {
+        margin-bottom: 10px;
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+
+      p.lead {
+        max-width: 780px;
+        color: var(--text-secondary);
+        font-size: clamp(18px, 2vw, 24px);
+        line-height: 1.48;
+      }
+
+      p.body {
+        color: var(--text-muted);
+        font-size: 16px;
+        line-height: 1.62;
+      }
+
+      strong,
+      .accent {
+        color: var(--text-primary);
+      }
+
+      .muted {
+        color: var(--text-subtle);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .tag {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        border: 1px solid rgba(113, 112, 255, 0.22);
+        border-radius: 4px;
+        background: rgba(113, 112, 255, 0.1);
+        color: var(--accent);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 550;
+        padding: 6px 10px;
+      }
+
+      .hero-line {
+        width: min(520px, 68vw);
+        height: 1px;
+        margin: 34px 0 28px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .panel,
+      .card {
+        border: 1px solid var(--border-std);
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018));
+      }
+
+      .card {
+        min-height: 158px;
+        padding: 22px;
+      }
+
+      .card.compact {
+        min-height: 112px;
+        padding: 18px;
+      }
+
+      .card p,
+      .card li {
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.48;
+      }
+
+      .card .icon {
+        display: flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border: 1px solid rgba(113, 112, 255, 0.24);
+        border-radius: 8px;
+        background: rgba(113, 112, 255, 0.1);
+        color: var(--accent);
+      }
+
+      .quote {
+        position: relative;
+        margin-top: 30px;
+        border-left: 2px solid var(--accent);
+        padding: 20px 0 20px 26px;
+        color: var(--text-primary);
+        font-size: clamp(22px, 3vw, 34px);
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 1.18;
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .flow span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        border: 1px solid var(--border-std);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.035);
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 12px;
+        padding: 8px 11px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .check-list {
+        display: grid;
+        gap: 11px;
+        list-style: none;
+      }
+
+      .check-list li {
+        position: relative;
+        padding-left: 28px;
+        color: var(--text-secondary);
+        font-size: 15px;
+        line-height: 1.44;
+      }
+
+      .check-list li::before {
+        content: '';
+        position: absolute;
+        top: 0.55em;
+        left: 0;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 5px rgba(113, 112, 255, 0.12);
+      }
+
+      .matrix {
+        overflow: hidden;
+        border: 1px solid var(--border-std);
+        border-radius: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 13px 15px;
+        border-bottom: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        font-size: 13px;
+        line-height: 1.36;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: rgba(255, 255, 255, 0.045);
+        color: var(--text-primary);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .risk {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 650;
+      }
+
+      .risk::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .risk.green::before {
+        background: var(--green);
+      }
+      .risk.yellow::before {
+        background: var(--yellow);
+      }
+      .risk.red::before {
+        background: var(--red);
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .level {
+        min-height: 220px;
+        border: 1px solid var(--border-std);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 16px;
+      }
+
+      .level .num {
+        display: inline-flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .level h3 {
+        min-height: 46px;
+        margin-bottom: 12px;
+        font-size: 15px;
+      }
+
+      .level p {
+        color: var(--text-muted);
+        font-size: 12.5px;
+        line-height: 1.42;
+      }
+
+      .code-window {
+        overflow: hidden;
+        border: 1px solid var(--border-std);
+        border-radius: 8px;
+        background: var(--bg-panel);
+        box-shadow: rgba(0, 0, 0, 0.45) 0 14px 40px;
+      }
+
+      .code-title {
+        display: flex;
+        height: 34px;
+        align-items: center;
+        gap: 6px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+        background: #2d2e30;
+        padding: 0 12px;
+      }
+
+      .code-title span:not(.file) {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ff5f57;
+      }
+
+      .code-title span:nth-child(2) {
+        background: #ffbd2e;
+      }
+
+      .code-title span:nth-child(3) {
+        background: #28c840;
+      }
+
+      .code-title .file {
+        margin-left: 10px;
+        color: var(--text-subtle);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 11px;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 18px;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 12.2px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      .kpi {
+        display: flex;
+        min-height: 132px;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--border-std);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 18px;
+      }
+
+      .kpi span {
+        color: var(--accent);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .kpi strong {
+        font-size: 22px;
+        letter-spacing: -0.02em;
+      }
+
+      .footer-note {
+        position: fixed;
+        bottom: 28px;
+        left: 32px;
+        z-index: 80;
+        color: var(--text-subtle);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+      }
+
+      @media (max-width: 900px) {
+        .slide {
+          overflow-y: auto;
+          align-items: flex-start;
+          padding: 42px 22px 82px;
+        }
+
+        .progress-bar {
+          right: 12px;
+          gap: 7px;
+        }
+
+        .grid.two,
+        .grid.three,
+        .grid.four,
+        .split,
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline {
+          gap: 12px;
+        }
+
+        .level {
+          min-height: auto;
+        }
+
+        .level h3 {
+          min-height: auto;
+        }
+
+        th,
+        td {
+          padding: 11px;
+          font-size: 12px;
+        }
+
+        .footer-note {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-bar" id="progressBar" aria-label="Navegação dos slides"></div>
+    <div class="nav-arrows">
+      <button class="nav-btn" id="btnPrev" aria-label="Slide anterior">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+      <button class="nav-btn" id="btnNext" aria-label="Próximo slide">
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+    </div>
+    <div class="footer-note">Use setas, espaço ou swipe</div>
+
+    <div class="slides-wrap" id="slidesWrap">
+      <section class="slide active" data-slide="1">
+        <div class="slide-inner narrow stagger">
+          <p class="eyebrow">ILEGRA AI-NATIVE ENGINEERING</p>
+          <h1 class="display">Playbook interno para desenvolvimento com IA</h1>
+          <p class="lead">
+            Um guia prático para usar inteligência artificial no ciclo de
+            software com produtividade, segurança, governança e rastreabilidade.
+          </p>
+          <div class="hero-line"></div>
+          <div class="tag-row">
+            <span class="tag">versão 1.0</span>
+            <span class="tag">23 junho 2026</span>
+            <span class="tag">engenharia aumentada</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="2">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Propósito</p>
+          <h2>IA como capacidade de engenharia, não atalho de código.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            O playbook organiza como a Ilegra usa IA para acelerar entrega sem
+            perder clareza, segurança, qualidade técnica e responsabilidade humana.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-compass"></i></div>
+              <h3>Direcionar</h3>
+              <p>Definir quando, onde e como usar IA em projetos internos, produtos, clientes, sustentação, modernização e inovação.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>Controlar risco</h3>
+              <p>Proteger código, dados, credenciais, decisões críticas e ambientes operacionais sem bloquear a adoção.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+              <h3>Medir resultado</h3>
+              <p>Acompanhar valor, fluxo, qualidade, previsibilidade e aprendizado, não apenas volume de código gerado.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>produtividade</span>
+            <span>segurança</span>
+            <span>governança</span>
+            <span>auditabilidade</span>
+            <span>métricas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="3">
+        <div class="slide-inner stagger">
+          <p class="eyebrow">Diretriz central</p>
+          <h2>A Ilegra não adota “vibe coding” como prática corporativa.</h2>
+          <div class="quote">
+            Adotamos engenharia assistida por IA baseada em contexto,
+            especificação, planejamento, validação, testes, segurança,
+            revisão humana e rastreabilidade.
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="4">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fluxo recomendado</p>
+          <h2>Do problema ao aprendizado contínuo.</h2>
+          <p class="lead">
+            A IA entra no fluxo inteiro: ajuda a refinar intenção, transformar
+            contexto em especificação, executar tarefas menores e gerar
+            evidências para revisão.
+          </p>
+          <div class="flow">
+            <span>Problema</span>
+            <span>Contexto</span>
+            <span>Especificação</span>
+            <span>Planejamento</span>
+            <span>Implementação assistida</span>
+            <span>Testes</span>
+            <span>Revisão</span>
+            <span>Segurança</span>
+            <span>Documentação</span>
+            <span>Entrega</span>
+            <span>Métricas</span>
+            <span>Aprendizado</span>
+          </div>
+          <div class="grid three" style="margin-top: 28px">
+            <div class="card compact">
+              <h3>Antes de codar</h3>
+              <p>Use IA para explorar ambiguidades, riscos, alternativas e critérios de aceite.</p>
+            </div>
+            <div class="card compact">
+              <h3>Durante a execução</h3>
+              <p>Peça planos pequenos, gere testes, compare diffs e mantenha escopo revisável.</p>
+            </div>
+            <div class="card compact">
+              <h3>Depois da entrega</h3>
+              <p>Atualize documentação, registre evidências, meça impacto e incorpore aprendizados.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="5">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Princípios não negociáveis</p>
+          <h2>O contrato mínimo para qualquer uso de IA.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            Esses princípios existem para permitir uso intenso de IA com confiança:
+            quanto maior a autonomia da ferramenta, mais claros precisam ser os controles.
+          </p>
+          <div class="grid two">
+            <ul class="check-list">
+              <li>IA é copiloto, não responsável técnico.</li>
+              <li>Nenhum código gerado por IA entra em produção sem revisão humana.</li>
+              <li>Todo código passa pelos mesmos controles de qualidade.</li>
+              <li>Segredos, tokens, senhas e credenciais nunca vão para modelos.</li>
+              <li>Dados de clientes só entram em ferramentas aprovadas contratualmente.</li>
+            </ul>
+            <ul class="check-list">
+              <li>Mudanças devem ser pequenas, rastreáveis, testáveis e reversíveis.</li>
+              <li>A IA segue padrões existentes antes de propor novos padrões.</li>
+              <li>Agentes operam com o menor privilégio possível.</li>
+              <li>Ações destrutivas exigem autorização humana explícita.</li>
+              <li>Resultado gerado por IA só vira evidência após validação.</li>
+            </ul>
+          </div>
+          <div class="tag-row">
+            <span class="tag">responsabilidade humana</span>
+            <span class="tag">menor privilégio</span>
+            <span class="tag">PR pequeno</span>
+            <span class="tag">testes obrigatórios</span>
+            <span class="tag">rastreabilidade</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="6">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">É / não é</p>
+          <h2>Desenvolvimento com IA tem bordas claras.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            A diferença não está em usar ou não usar IA. Está em usar IA como
+            parte de um processo verificável, com contexto, validação e ownership.
+          </p>
+          <div class="grid two">
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-check"></i></div>
+              <h3>É desenvolvimento com IA</h3>
+              <ul class="check-list">
+                <li>Analisar requisitos e ambiguidades.</li>
+                <li>Comparar alternativas arquiteturais.</li>
+                <li>Criar planos, testes e documentação.</li>
+                <li>Apoiar code review, logs e incidentes.</li>
+                <li>Automatizar tarefas delimitadas com evidência.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-xmark"></i></div>
+              <h3>Não é desenvolvimento com IA</h3>
+              <ul class="check-list">
+                <li>Aceitar código sem entender.</li>
+                <li>Colocar uma app gerada por prompt em produção.</li>
+                <li>Delegar arquitetura integralmente à IA.</li>
+                <li>Substituir testes por avaliação textual do modelo.</li>
+                <li>Usar dados ou ferramentas fora do acordo do projeto.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="7">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Modelo de maturidade</p>
+          <h2>Da Shadow AI à engenharia AI-Native.</h2>
+          <div class="timeline">
+            <div class="level">
+              <span class="num">0</span>
+              <h3>Shadow AI</h3>
+              <p>Uso individual sem política, inventário, controle ou rastreabilidade.</p>
+            </div>
+            <div class="level">
+              <span class="num">1</span>
+              <h3>Adoção de ferramentas</h3>
+              <p>Ferramentas disponíveis, mas processo e métricas ainda inconsistentes.</p>
+            </div>
+            <div class="level">
+              <span class="num">2</span>
+              <h3>AI SDLC padronizado</h3>
+              <p>Templates, checklists e políticas integrados ao fluxo real.</p>
+            </div>
+            <div class="level">
+              <span class="num">3</span>
+              <h3>Engenharia orientada a contexto</h3>
+              <p>Repositórios ricos em documentação, ADRs, contratos e exemplos.</p>
+            </div>
+            <div class="level">
+              <span class="num">4</span>
+              <h3>Entrega agêntica controlada</h3>
+              <p>Agentes atuam em tarefas delimitadas com logs e aprovação humana.</p>
+            </div>
+            <div class="level">
+              <span class="num">5</span>
+              <h3>AI-Native</h3>
+              <p>Plataforma, catálogo, governança, observabilidade e evolução contínua.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="8">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 0</p>
+          <h2>Shadow AI: uso existe, mas a organização ainda não enxerga.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Pessoas usam ferramentas por conta própria, sem inventário, política, padrão de dados ou suporte formal.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos principais</h3>
+              <p>Vazamento de dados, custo oculto, inconsistência, dependência individual e falta de rastreabilidade.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo passo</h3>
+              <p>Criar política mínima, catálogo de ferramentas aprovadas e orientação clara para uso seguro em projetos.</p>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">inventariar</span>
+            <span class="tag">aprovar ferramentas</span>
+            <span class="tag">bloquear segredos</span>
+            <span class="tag">orientar times</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="9">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 1</p>
+          <h2>Adoção de ferramentas: ganho individual, ainda sem efeito sistêmico.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Copilot, ChatGPT, Cursor, Claude ou similares já estão disponíveis para parte dos profissionais.</p>
+            </div>
+            <div class="card">
+              <h3>O gargalo</h3>
+              <p>O uso depende do repertório individual. Falta padrão de prompting, revisão, evidência e medição.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo passo</h3>
+              <p>Capacitar times, definir práticas mínimas por função e medir adoção, satisfação e riscos iniciais.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>licenças</span>
+            <span>onboarding</span>
+            <span>boas práticas</span>
+            <span>primeiras métricas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="10">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 2</p>
+          <h2>AI SDLC padronizado: IA entra no fluxo real de desenvolvimento.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Templates, checklists, políticas, prompts, critérios de aceite e padrões de PR começam a ser comuns.</p>
+            </div>
+            <div class="card">
+              <h3>O que muda</h3>
+              <p>A IA deixa de ser conversa solta e passa a apoiar discovery, planejamento, implementação, testes e review.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo passo</h3>
+              <p>Conectar IA ao CI/CD, DoR, DoD, segurança, documentação e rituais de melhoria contínua.</p>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">DoR</span>
+            <span class="tag">DoD</span>
+            <span class="tag">PR pequeno</span>
+            <span class="tag">testes</span>
+            <span class="tag">evidências</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="11">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 3</p>
+          <h2>Engenharia orientada a contexto: o repositório passa a ensinar.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Arquitetura, ADRs, contratos, exemplos, comandos, padrões e restrições estão documentados no repo.</p>
+            </div>
+            <div class="card">
+              <h3>Por que importa</h3>
+              <p>Quanto melhor o contexto, menor a chance de alucinação e maior a consistência entre pessoas e agentes.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo passo</h3>
+              <p>Manter `AGENTS.md`, specs, runbooks, decisões e documentação viva como parte da entrega.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>AGENTS.md</span>
+            <span>ADRs</span>
+            <span>contratos</span>
+            <span>exemplos</span>
+            <span>runbooks</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="12">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 4</p>
+          <h2>Entrega agêntica controlada: agentes executam tarefas delimitadas.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Agentes criam branches, alteram código, rodam testes, atualizam docs e abrem PRs com rastreabilidade.</p>
+            </div>
+            <div class="card">
+              <h3>Controles</h3>
+              <p>Escopo pequeno, permissões mínimas, logs, revisão humana, aprovação para escrita e bloqueio de produção.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo passo</h3>
+              <p>Criar catálogo de agentes, skills reutilizáveis, MCPs aprovados e métricas de sucesso por workflow.</p>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">branch própria</span>
+            <span class="tag">diff revisável</span>
+            <span class="tag">logs</span>
+            <span class="tag">aprovação humana</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="13">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 5</p>
+          <h2>Engenharia AI-Native: IA vira plataforma, governança e escala.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Como aparece</h3>
+              <p>Há catálogo de ferramentas, agentes, skills, MCPs, gateways, métricas, políticas e aceleradores internos.</p>
+            </div>
+            <div class="card">
+              <h3>O diferencial</h3>
+              <p>A organização aprende continuamente: mede impacto, atualiza padrões e replica o que funcionou.</p>
+            </div>
+            <div class="card">
+              <h3>Manter vivo</h3>
+              <p>Benchmark contínuo, treinamento, auditoria, observabilidade, FinOps e governança de modelos.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>plataforma</span>
+            <span>catálogo</span>
+            <span>observabilidade</span>
+            <span>governança</span>
+            <span>escala</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="14">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Papéis e responsabilidades</p>
+          <h2>Governança distribuída, responsabilidade explícita.</h2>
+          <div class="grid three">
+            <div class="card compact">
+              <h3>Comitê AI Engineering</h3>
+              <p>Políticas, riscos, catálogo tecnológico, custos, métricas e evolução do playbook.</p>
+            </div>
+            <div class="card compact">
+              <h3>AI Champion</h3>
+              <p>Apoia adoção no squad, coleta aprendizados, acompanha métricas e compartilha práticas.</p>
+            </div>
+            <div class="card compact">
+              <h3>Arquitetura</h3>
+              <p>Aprova decisões, dependências, integrações, MCPs, gateways, RAG e acesso a dados.</p>
+            </div>
+            <div class="card compact">
+              <h3>Segurança e privacidade</h3>
+              <p>Classificação de dados, threat modeling, DLP, fornecedores, auditoria e incidentes.</p>
+            </div>
+            <div class="card compact">
+              <h3>Squad</h3>
+              <p>Revisa outputs, mantém contexto, cria testes, valida comportamento e registra evidências.</p>
+            </div>
+            <div class="card compact">
+              <h3>Lideranças</h3>
+              <p>Conectam adoção a valor, priorização, capacitação, métricas e gestão da mudança.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="15">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Política de dados</p>
+          <h2>Use IA em todos os projetos, com o contexto certo na ferramenta certa.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            A política não é um freio à adoção. Ela existe para acelerar com segurança:
+            quanto mais sensível o contexto, mais importante usar ambiente aprovado,
+            mascaramento, autorização e rastreabilidade.
+          </p>
+          <div class="matrix">
+            <table>
+              <thead>
+                <tr>
+                  <th>Contexto</th>
+                  <th>Como incentivar o uso</th>
+                  <th>Guardrail mínimo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Documentação pública, código open source e exemplos fictícios</td>
+                  <td>Usar livremente para aprender, prototipar, comparar soluções e criar rascunhos.</td>
+                  <td>Validar fontes e não tratar resposta da IA como evidência final.</td>
+                </tr>
+                <tr>
+                  <td>Código interno da Ilegra</td>
+                  <td>Usar em ferramentas enterprise aprovadas para acelerar desenvolvimento, testes e review.</td>
+                  <td>Seguir política interna, controle de acesso, logs e revisão humana.</td>
+                </tr>
+                <tr>
+                  <td>Código, documentos e contexto de cliente</td>
+                  <td>Usar IA sempre que houver autorização contratual e ferramenta aprovada para o projeto.</td>
+                  <td>Confirmar permissão, retenção, região, confidencialidade e rastreabilidade.</td>
+                </tr>
+                <tr>
+                  <td>Dados pessoais, logs com PII, dados financeiros ou saúde</td>
+                  <td>Usar após mascaramento, anonimização ou base legal em ambiente autorizado.</td>
+                  <td>Aplicar DLP, minimização de dados e aprovação de segurança/privacidade.</td>
+                </tr>
+                <tr>
+                  <td>Tokens, chaves e credenciais</td>
+                  <td>Não usar em prompts, anexos, logs ou ferramentas de IA.</td>
+                  <td>Nunca enviar. Rotacionar imediatamente se houver exposição.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="16">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Classificação de risco</p>
+          <h2>Três faixas para decidir autonomia e aprovação.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            A cor não mede importância da tarefa. Ela define o nível de controle:
+            quanto mais impacto em dados, produção, segurança ou cliente, mais
+            revisão e autorização são necessárias.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3><span class="risk green">Verde</span></h3>
+              <p>Uso assistido de baixo risco: explicações, documentação pública, exemplos fictícios, rascunhos, brainstorming e apoio local sem dados sensíveis.</p>
+              <div class="tag-row"><span class="tag">autonomia alta</span><span class="tag">sem dados sensíveis</span></div>
+            </div>
+            <div class="card">
+              <h3><span class="risk yellow">Amarelo</span></h3>
+              <p>Revisão humana obrigatória: código, testes, refatorações, integrações, análise de logs mascarados e alterações de configuração.</p>
+              <div class="tag-row"><span class="tag">PR revisado</span><span class="tag">testes</span></div>
+            </div>
+            <div class="card">
+              <h3><span class="risk red">Vermelho</span></h3>
+              <p>Aprovação especializada: produção, dados sensíveis, segurança, custos relevantes, arquitetura crítica, contratos e decisões regulatórias.</p>
+              <div class="tag-row"><span class="tag">aprovação explícita</span><span class="tag">auditoria</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="17">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">IA no ciclo de desenvolvimento</p>
+          <h2>Onde a IA ajuda mais quando o processo está claro.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            O maior ganho aparece quando a IA participa de ponta a ponta:
+            reduz ambiguidade antes da execução, acelera tarefas durante a entrega
+            e melhora aprendizado depois do deploy.
+          </p>
+          <div class="grid four">
+            <div class="card compact">
+              <h3>Descoberta</h3>
+              <p>Ambiguidades, critérios de aceite, riscos, jornadas, personas, hipóteses e perguntas para o cliente.</p>
+            </div>
+            <div class="card compact">
+              <h3>Arquitetura</h3>
+              <p>Alternativas, trade-offs, ADRs, contratos, impacto em integrações, dados, custos e operação.</p>
+            </div>
+            <div class="card compact">
+              <h3>Implementação</h3>
+              <p>Boilerplate, refatoração, migração, testes, revisão de diff, documentação e scripts auxiliares.</p>
+            </div>
+            <div class="card compact">
+              <h3>Operação</h3>
+              <p>Logs, incidentes, runbooks, postmortems, documentação viva, onboarding e melhoria contínua.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>menos ambiguidade</span>
+            <span>PR menor</span>
+            <span>mais testes</span>
+            <span>review mais rápido</span>
+            <span>documentação viva</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="18">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Spec-Driven Development</p>
+          <h2>A especificação vira o eixo de colaboração entre pessoa, time e agente.</h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Antes de pedir código, o time transforma intenção em contrato:
+                problema, contexto, requisitos, critérios de aceite, riscos,
+                plano e validação.
+              </p>
+            </div>
+            <div class="code-window">
+              <div class="code-title">
+                <span></span><span></span><span></span><span class="file">spec.md</span>
+              </div>
+              <pre># Feature
+Objetivo de negócio
+
+## Contexto
+Sistema, personas, restrições
+
+## Requisitos
+Funcionais e não funcionais
+
+## Critérios de aceite
+Cenários observáveis
+
+## Plano
+Passos pequenos, testáveis e reversíveis</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="19">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Engenharia agêntica</p>
+          <h2>Agentes podem executar, mas dentro de guardrails.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            O agente é útil quando a tarefa tem escopo, contexto, comandos,
+            critérios de sucesso e limites. Sem isso, ele vira automação sem direção.
+          </p>
+          <div class="grid two">
+            <ul class="check-list">
+              <li>Tarefas delimitadas, branch própria e escopo explícito.</li>
+              <li>Logs, diff revisável e plano antes de mudanças grandes.</li>
+              <li>Testes executados ou limitação declarada.</li>
+              <li>Permissões mínimas e integração com ferramentas aprovadas.</li>
+            </ul>
+            <ul class="check-list">
+              <li>Sem deploy em produção sem controle humano.</li>
+              <li>Sem comandos destrutivos sem autorização explícita.</li>
+              <li>Sem alteração de arquitetura crítica sozinho.</li>
+              <li>Sem acesso irrestrito a segredos, dados ou ambientes.</li>
+            </ul>
+          </div>
+          <div class="grid three" style="margin-top: 24px">
+            <div class="card compact">
+              <h3>Bom candidato</h3>
+              <p>Correção pequena, teste faltante, migração mecânica, documentação, análise de logs ou revisão de PR.</p>
+            </div>
+            <div class="card compact">
+              <h3>Exige cuidado</h3>
+              <p>Arquitetura, segurança, performance, dados sensíveis, mudanças cross-repo ou impacto em produção.</p>
+            </div>
+            <div class="card compact">
+              <h3>Evidência mínima</h3>
+              <p>Plano, diff, testes executados, limitações, riscos, rollback e próximos passos claros.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="20">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Contexto de repositório</p>
+          <h2>Um bom `AGENTS.md` reduz alucinação e acelera onboarding.</h2>
+          <div class="code-window">
+            <div class="code-title">
+              <span></span><span></span><span></span><span class="file">AGENTS.md</span>
+            </div>
+            <pre># Visão do projeto
+O que o sistema faz, domínios principais e limites.
+
+## Stack
+Linguagens, frameworks, banco, filas, cloud e ferramentas.
+
+## Comandos
+Como instalar, testar, lintar, buildar e rodar localmente.
+
+## Arquitetura
+Pastas, padrões, contratos, integrações e decisões importantes.
+
+## Qualidade e segurança
+Cobertura esperada, checks obrigatórios, dados proibidos e revisão.
+
+## Pull request
+Formato, evidências, riscos, testes e rollback.</pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="21">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Ready / Done</p>
+          <h2>IA funciona melhor quando entrada e saída têm critérios.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            DoR evita que a IA trabalhe em cima de ambiguidade. DoD garante que a
+            velocidade extra não vire dívida técnica, falha de segurança ou entrega sem evidência.
+          </p>
+          <div class="grid two">
+            <div class="card">
+              <h3>Definition of Ready</h3>
+              <ul class="check-list">
+                <li>Problema e valor esperados claros.</li>
+                <li>Critérios de aceite testáveis.</li>
+                <li>Dados, restrições e riscos conhecidos.</li>
+                <li>Contexto técnico disponível para pessoas e agentes.</li>
+                <li>Ferramenta/modelo permitido para o tipo de dado.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Definition of Done</h3>
+              <ul class="check-list">
+                <li>Código revisado por humano.</li>
+                <li>Testes, segurança e evidências anexados.</li>
+                <li>Documentação e contexto atualizados.</li>
+                <li>Mudança pequena, rastreável e reversível.</li>
+                <li>Limitações da IA e decisões relevantes registradas.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="22">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Métricas</p>
+          <h2>Medir o sistema, não só a ferramenta.</h2>
+          <p class="lead" style="margin-bottom: 22px">
+            A pergunta não é “quantas linhas a IA escreveu?”. É se o time entregou
+            melhor: menos espera, menos retrabalho, mais qualidade e mais previsibilidade.
+          </p>
+          <div class="grid four">
+            <div class="kpi">
+              <span>Fluxo</span>
+              <strong>lead time, cycle time, PR size, tempo de review</strong>
+            </div>
+            <div class="kpi">
+              <span>Qualidade</span>
+              <strong>bugs, retrabalho, cobertura, flaky tests, incidentes</strong>
+            </div>
+            <div class="kpi">
+              <span>IA</span>
+              <strong>adoção, aceitação, prompts úteis, falhas, rollback</strong>
+            </div>
+            <div class="kpi">
+              <span>Negócio</span>
+              <strong>valor entregue, previsibilidade, satisfação, time-to-market</strong>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">baseline antes/depois</span>
+            <span class="tag">métrica por squad</span>
+            <span class="tag">evidência no PR</span>
+            <span class="tag">qualidade acima de volume</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="23">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Benchmark contínuo</p>
+          <h2>A stack de IA muda rápido. O processo de escolha precisa ser contínuo.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Critérios de escolha</h3>
+              <p>Qualidade para a stack, IDEs suportadas, modo agentic, MCP, privacidade, SSO, auditoria e custos.</p>
+            </div>
+            <div class="card">
+              <h3>Arquitetura de compra</h3>
+              <p>Licenças por usuário, pay-as-you-go, APIs diretas e gateways corporativos têm trade-offs diferentes.</p>
+            </div>
+            <div class="card">
+              <h3>Revisão periódica</h3>
+              <p>Atualizar benchmarks, modelos, licenças, políticas e aprendizados com base em evidências.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="24">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">IDEs, agentes e licenças</p>
+          <h2>O que dá para comprar ou contratar para acelerar times.</h2>
+          <div class="matrix">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ferramenta</th>
+                  <th>Perfil</th>
+                  <th>Preço ref.</th>
+                  <th>Uso principal</th>
+                  <th>Atenção</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cursor</td>
+                  <td>IDE agentic</td>
+                  <td>US$ 20/mês; times ~US$ 40/usuário/mês</td>
+                  <td>Desenvolvimento diário com contexto de repositório e edição assistida.</td>
+                  <td>Política de dados, modelos disponíveis e custo por assento.</td>
+                </tr>
+                <tr>
+                  <td>GitHub Copilot</td>
+                  <td>IDE + GitHub</td>
+                  <td>Pro US$ 10; Pro+ US$ 39; Business ~US$ 19; Enterprise ~US$ 39</td>
+                  <td>Autocomplete, chat, agentes, PRs e integração com fluxo GitHub.</td>
+                  <td>Planos, créditos, permissões e governança enterprise.</td>
+                </tr>
+                <tr>
+                  <td>Claude Code</td>
+                  <td>Agente de terminal</td>
+                  <td>Claude Pro US$ 20; Team ~US$ 25/usuário/mês; enterprise + uso API</td>
+                  <td>Código, testes, automação, leitura de repo e tarefas longas.</td>
+                  <td>Controle de comandos, custos por uso e acesso a dados.</td>
+                </tr>
+                <tr>
+                  <td>ChatGPT / Codex</td>
+                  <td>Produto + agente</td>
+                  <td>Plus US$ 20; Business ~US$ 25 mensal ou US$ 20 anual; Enterprise custom</td>
+                  <td>Planejamento, implementação assistida, revisão e automações de engenharia.</td>
+                  <td>Planos, conectores, retenção e limites corporativos.</td>
+                </tr>
+                <tr>
+                  <td>JetBrains AI, Zed, Trae, Kilo, OpenCode</td>
+                  <td>IDE/gateway/agente</td>
+                  <td>Faixa típica ~US$ 5 a US$ 30/mês; enterprise sob consulta</td>
+                  <td>Opções por stack, preferência de editor, modelo e integração.</td>
+                  <td>Maturidade, licença, suporte, auditoria e lock-in.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body" style="margin-top: 14px">
+            Valores aproximados em dólar, usados como referência de comparação. Revisar câmbio, impostos,
+            créditos, limites e política enterprise antes de contratar.
+          </p>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="25">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Benchmark de agentes</p>
+          <h2>Agentes de engenharia não são iguais: cada um tem um melhor encaixe.</h2>
+          <div class="grid three">
+            <div class="card">
+              <h3>Terminal e repo</h3>
+              <p>Claude Code, OpenCode, Aider e Qwen Code tendem a brilhar em edição, testes, automação e fluxo local.</p>
+            </div>
+            <div class="card">
+              <h3>IDE e modos</h3>
+              <p>Cline, Roo Code e Kilo Code oferecem experiência dentro do VS Code, modos especializados e integração com MCP.</p>
+            </div>
+            <div class="card">
+              <h3>Pesquisa e autonomia</h3>
+              <p>OpenClaw, Hermes Agent e SWE-agent miram automação mais ampla, resolução de issues e tarefas com ferramentas.</p>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">segurança</span>
+            <span class="tag">licença</span>
+            <span class="tag">comunidade</span>
+            <span class="tag">frequência de atualização</span>
+            <span class="tag">compatibilidade enterprise</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="26">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Custom Agents</p>
+          <h2>Personas técnicas em `.md` ajudam agentes a pensar como especialistas.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Custom Agents são definições de papel: dev backend, arquiteto, QA,
+            security reviewer, SRE, tech lead ou product analyst. Eles guiam
+            postura, critérios, perguntas e padrões esperados para uma função.
+          </p>
+          <div class="split">
+            <div class="grid two">
+              <div class="card compact">
+                <h3>Quando usar</h3>
+                <p>Para revisar PRs, desenhar arquitetura, gerar testes, avaliar segurança, investigar incidentes ou refinar histórias.</p>
+              </div>
+              <div class="card compact">
+                <h3>O que definir</h3>
+                <p>Responsabilidade, limites, checklists, tom de revisão, critérios de qualidade, comandos e evidências esperadas.</p>
+              </div>
+              <div class="card compact">
+                <h3>Diferença para Skill</h3>
+                <p>Agent define o papel. Skill define o workflow reutilizável, com passos, scripts, templates e referências.</p>
+              </div>
+              <div class="card compact">
+                <h3>Cuidado</h3>
+                <p>Persona não substitui contexto do repo, política de dados, testes, revisão humana ou autorização explícita.</p>
+              </div>
+            </div>
+            <div class="code-window">
+              <div class="code-title">
+                <span></span><span></span><span></span><span class="file">agents/architect.md</span>
+              </div>
+              <pre># Architect Agent
+Papel: avaliar decisões técnicas e trade-offs.
+
+Foco:
+- coerência arquitetural
+- riscos de integração
+- segurança e operação
+- custo e escalabilidade
+
+Sempre entregar:
+- recomendação
+- alternativas
+- riscos
+- evidências necessárias</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="27">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Context Engineering</p>
+          <h2>A qualidade da resposta depende da qualidade do contexto.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Context engineering é o trabalho de montar o pacote certo para a IA:
+            objetivo, arquivos relevantes, specs, ADRs, exemplos, restrições,
+            comandos, histórico e critérios de aceite.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>O que incluir</h3>
+              <p>Problema, objetivo de negócio, stack, padrões do repo, contratos, APIs, dados de exemplo e decisões já tomadas.</p>
+            </div>
+            <div class="card">
+              <h3>O que evitar</h3>
+              <p>Contexto demais, arquivos irrelevantes, dados sensíveis, instruções conflitantes e prompts sem critério de sucesso.</p>
+            </div>
+            <div class="card">
+              <h3>Como operacionalizar</h3>
+              <p>AGENTS.md, specs, knowledge base, MCPs read-only, templates de tarefa e exemplos bons de PR.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>objetivo</span>
+            <span>restrições</span>
+            <span>arquivos</span>
+            <span>exemplos</span>
+            <span>critérios</span>
+            <span>evidência</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="28">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Prompt Engineering</p>
+          <h2>Prompt bom é especificação curta, não pedido mágico.</h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Prompts corporativos devem ser claros, reutilizáveis e verificáveis:
+                definem papel, objetivo, contexto, restrições, formato da resposta,
+                critérios de sucesso e limites de segurança.
+              </p>
+              <div class="tag-row">
+                <span class="tag">papel</span>
+                <span class="tag">objetivo</span>
+                <span class="tag">contexto</span>
+                <span class="tag">restrições</span>
+                <span class="tag">formato</span>
+                <span class="tag">validação</span>
+              </div>
+            </div>
+            <div class="code-window">
+              <div class="code-title">
+                <span></span><span></span><span></span><span class="file">prompt-template.md</span>
+              </div>
+              <pre>Papel: atue como revisor técnico sênior.
+
+Objetivo: revisar o diff abaixo.
+
+Contexto: stack, regra de negócio e risco.
+
+Restrições:
+- não sugerir nova lib sem justificar
+- apontar testes ausentes
+- separar bug de melhoria
+
+Saída:
+1. riscos críticos
+2. dúvidas
+3. próximos passos</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="29">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Prompt Library</p>
+          <h2>Prompts aprovados viram ativo reutilizável do time.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Uma biblioteca interna reduz improviso e acelera adoção: prompts por
+            área, tarefa e ferramenta, versionados junto com exemplos de entrada,
+            saída esperada e política de dados.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>Onde aplicar</h3>
+              <p>Discovery, arquitetura, ADR, testes, code review, segurança, incidentes, documentação, propostas e RFPs.</p>
+            </div>
+            <div class="card">
+              <h3>Como governar</h3>
+              <p>Dono, versão, changelog, exemplos, tags por risco, ferramenta permitida e revisão periódica.</p>
+            </div>
+            <div class="card">
+              <h3>Exemplos de tooling</h3>
+              <p>Git repo simples, Promptfoo para testes, Langfuse/LangSmith para tracing e avaliação de prompts em apps.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>prompts/</span>
+            <span>exemplos</span>
+            <span>evals</span>
+            <span>aprovação</span>
+            <span>uso por squads</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="30">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Skills</p>
+          <h2>Skills transformam conhecimento repetível em capacidade de agente.</h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Uma skill é um pacote versionado de instruções, scripts, exemplos
+                e recursos que ensina um agente a executar um workflow específico.
+              </p>
+              <div class="tag-row">
+                <span class="tag">discovery</span>
+                <span class="tag">arquitetura</span>
+                <span class="tag">testes</span>
+                <span class="tag">review</span>
+                <span class="tag">segurança</span>
+              </div>
+            </div>
+            <div class="code-window">
+              <div class="code-title">
+                <span></span><span></span><span></span><span class="file">skill interna</span>
+              </div>
+              <pre>skill/
+  SKILL.md
+  scripts/
+  references/
+  templates/
+
+Uso recomendado:
+1. Definir workflow
+2. Explicitar entradas e saídas
+3. Incluir checks e exemplos
+4. Versionar e medir resultados</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="31">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">MCPs</p>
+          <h2>MCP conecta agentes a ferramentas, dados e ações com uma interface padronizada.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Pense no MCP como uma camada de integração: o agente deixa de depender
+            só do prompt e passa a consultar sistemas, navegar, ler documentação,
+            abrir issues, testar telas ou buscar dados com permissões controladas.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>Por que usar</h3>
+              <p>Dar contexto atualizado ao agente, reduzir copiar/colar, automatizar tarefas repetíveis e registrar ações.</p>
+            </div>
+            <div class="card">
+              <h3>Como usar</h3>
+              <p>Começar read-only, limitar recursos, autenticar por escopo, registrar logs e liberar escrita por workflow.</p>
+            </div>
+            <div class="card">
+              <h3>Top MCPs</h3>
+              <p>GitHub, Playwright, Context7, Atlassian, Figma, Chrome DevTools, AWS, Slack, MongoDB e Salesforce.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>Agente</span>
+            <span>Permissões</span>
+            <span>Servidor MCP</span>
+            <span>Ferramenta real</span>
+            <span>Evidência</span>
+            <span>Revisão</span>
+          </div>
+          <p class="body" style="margin-top: 22px">
+            Avaliação obrigatória: origem, mantenedor, permissões, autenticação,
+            logs, escrita, prompt injection, dependências e risco de exfiltração.
+          </p>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="32">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">AI Gateway / Model Gateway</p>
+          <h2>Uma camada corporativa para modelos, custos, políticas e roteamento.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            O gateway evita que cada squad integre modelos de forma isolada. Ele centraliza
+            chaves, providers, logs, fallback, limites, políticas e medição de custo.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>O que resolve</h3>
+              <p>Padroniza acesso a OpenAI, Anthropic, Google, Mistral, modelos open source e agregadores.</p>
+            </div>
+            <div class="card">
+              <h3>Controles</h3>
+              <p>Rate limit, orçamento por squad, allowlist de modelos, redaction, roteamento, fallback e auditoria.</p>
+            </div>
+            <div class="card">
+              <h3>Exemplos</h3>
+              <p>LiteLLM, Portkey, Helicone AI Gateway, OpenRouter para prototipação e gateways internos.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>Squads</span>
+            <span>Gateway</span>
+            <span>Políticas</span>
+            <span>Providers</span>
+            <span>Logs</span>
+            <span>Custos</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="33">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Observabilidade de IA</p>
+          <h2>Sem tracing, custo e avaliação, IA vira caixa-preta cara.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Observabilidade permite entender o que foi enviado, qual modelo respondeu,
+            quanto custou, onde falhou e se a resposta realmente ajudou o workflow.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>O que medir</h3>
+              <p>Tokens, latência, custo, modelo, versão do prompt, tool calls, erro, retry, feedback humano e qualidade.</p>
+            </div>
+            <div class="card">
+              <h3>Onde usar</h3>
+              <p>Produtos com IA, agentes internos, gateways, knowledge bases, automações e fluxos críticos de engenharia.</p>
+            </div>
+            <div class="card">
+              <h3>Exemplos</h3>
+              <p>Langfuse, Helicone, Phoenix/Arize, OpenTelemetry, Promptfoo, Ragas e dashboards internos.</p>
+            </div>
+          </div>
+          <div class="tag-row">
+            <span class="tag">prompt/version</span>
+            <span class="tag">custo por squad</span>
+            <span class="tag">latência</span>
+            <span class="tag">falhas</span>
+            <span class="tag">avaliação humana</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="34">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Knowledge Base corporativa</p>
+          <h2>Uma memória compartilhada para padrões, decisões e contexto da empresa.</h2>
+          <p class="lead" style="margin-bottom: 24px">
+            Além do RAG dentro de produtos, vale criar espaços internos de conhecimento:
+            bases indexadas com documentos, PDFs, repositórios, playbooks, ADRs,
+            templates e padrões que todos do time podem referenciar nos agentes.
+          </p>
+          <div class="grid three">
+            <div class="card">
+              <h3>O que entra</h3>
+              <p>Playbooks, padrões de arquitetura, guias de segurança, propostas, ADRs, exemplos de PR, APIs, runbooks e repos de referência.</p>
+            </div>
+            <div class="card">
+              <h3>Como usar</h3>
+              <p>Spaces, knowledge bases ou collections por domínio, cliente, squad ou prática, sempre com curadoria e controle de acesso.</p>
+            </div>
+            <div class="card">
+              <h3>Por que importa</h3>
+              <p>Reduz respostas genéricas, acelera onboarding, padroniza decisões e permite que agentes sigam o jeito da empresa trabalhar.</p>
+            </div>
+          </div>
+          <div class="flow">
+            <span>Docs</span>
+            <span>Repos</span>
+            <span>ADRs</span>
+            <span>Templates</span>
+            <span>Space / KB</span>
+            <span>Agentes</span>
+            <span>Times</span>
+          </div>
+          <p class="body" style="margin-top: 22px">
+            Cuidados: dono da base, atualização contínua, versionamento, permissões,
+            fontes citáveis, remoção de conteúdo obsoleto e separação por cliente quando necessário.
+          </p>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="35">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Modelos abertos e eficientes</p>
+          <h2>Opções fortes para custo, contexto longo, open weights e coding agentic.</h2>
+          <div class="matrix">
+            <table>
+              <thead>
+                <tr>
+                  <th>Modelo</th>
+                  <th>Organização</th>
+                  <th>Entrada</th>
+                  <th>Saída</th>
+                  <th>Destaque</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GLM-5.2 / GLM-5.1</td>
+                  <td>Zhipu AI</td>
+                  <td>~US$ 1,40 / 1M tokens</td>
+                  <td>~US$ 4,40 / 1M tokens</td>
+                  <td>Coding, raciocínio, ferramentas e modelos open-weight.</td>
+                </tr>
+                <tr>
+                  <td>Qwen3.7 Max / Qwen3.5</td>
+                  <td>Alibaba / Qwen</td>
+                  <td>~US$ 0,60 a 1,25</td>
+                  <td>~US$ 3,60 a 3,75</td>
+                  <td>Boa relação custo-benefício, contexto extenso e ecossistema aberto.</td>
+                </tr>
+                <tr>
+                  <td>Kimi K2.7 / Kimi K2.6</td>
+                  <td>Moonshot AI</td>
+                  <td>~US$ 0,95 a 1,90</td>
+                  <td>~US$ 4,00 a 8,00</td>
+                  <td>Coding agentic, uso de ferramentas e contexto longo.</td>
+                </tr>
+                <tr>
+                  <td>DeepSeek V4, MiniMax M3, MiMo V2.5, Step 3.7</td>
+                  <td>DeepSeek, MiniMax, Xiaomi, StepFun</td>
+                  <td>~US$ 0,30 a 1,74</td>
+                  <td>~US$ 0,87 a 3,48</td>
+                  <td>Raciocínio, baixo custo, velocidade e tarefas agentic.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body" style="margin-top: 14px">
+            Preços aproximados por 1 milhão de tokens. Modelos open-weight podem não ter licença por token,
+            mas ainda exigem infraestrutura, observabilidade e operação.
+          </p>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="36">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Modelos proprietários e enterprise</p>
+          <h2>Opções fortes para raciocínio, multimodalidade, suporte corporativo e ferramentas.</h2>
+          <div class="matrix">
+            <table>
+              <thead>
+                <tr>
+                  <th>Modelo</th>
+                  <th>Organização</th>
+                  <th>Entrada</th>
+                  <th>Saída</th>
+                  <th>Destaque</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GPT-5.5 / GPT-5.4</td>
+                  <td>OpenAI</td>
+                  <td>~US$ 2,20 a 3,00 / 1M tokens</td>
+                  <td>~US$ 14,00 a 18,00 / 1M tokens</td>
+                  <td>Modelo geral, raciocínio, coding, agentes e ferramentas.</td>
+                </tr>
+                <tr>
+                  <td>Claude Opus / Sonnet</td>
+                  <td>Anthropic</td>
+                  <td>~US$ 3,00 a 4,50</td>
+                  <td>~US$ 15,00 a 22,50</td>
+                  <td>Coding complexo, tarefas longas, agentes e revisão de engenharia.</td>
+                </tr>
+                <tr>
+                  <td>Gemini Pro / Flash</td>
+                  <td>Google</td>
+                  <td>~US$ 1,50 a 2,00</td>
+                  <td>~US$ 9,00 a 12,00</td>
+                  <td>Multimodalidade, contexto extenso, velocidade e integração com ecossistema Google.</td>
+                </tr>
+                <tr>
+                  <td>Grok, Mistral, Command A</td>
+                  <td>xAI, Mistral AI, Cohere</td>
+                  <td>~US$ 1,25 a 2,50</td>
+                  <td>~US$ 2,50 a 10,00</td>
+                  <td>Custo competitivo, alternativa europeia, RAG e enterprise search.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body" style="margin-top: 14px">
+            Preços aproximados por 1 milhão de tokens. Avaliar descontos enterprise, cache,
+            tool calls, limites, região, retenção e custo real por fluxo.
+          </p>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="37">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Escolha de modelo</p>
+          <h2>Modelo bom é o que fecha a equação da tarefa: qualidade, custo, contexto e governança.</h2>
+          <div class="grid four">
+            <div class="kpi">
+              <span>Custo</span>
+              <strong>preço de input/output, cache, tool calls e volume mensal</strong>
+            </div>
+            <div class="kpi">
+              <span>Contexto</span>
+              <strong>janela útil, RAG, arquivos grandes e custo em tarefas longas</strong>
+            </div>
+            <div class="kpi">
+              <span>Qualidade</span>
+              <strong>raciocínio, coding, testes, tool use e aderência ao repo</strong>
+            </div>
+            <div class="kpi">
+              <span>Empresa</span>
+              <strong>retenção, região, auditoria, SLA, SSO e contrato</strong>
+            </div>
+          </div>
+          <div class="matrix" style="margin-top: 24px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Benchmarks de coding</th>
+                  <th>O que observar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SWE-bench</td>
+                  <td>Correção de issues reais em repositórios reais.</td>
+                </tr>
+                <tr>
+                  <td>LiveCodeBench</td>
+                  <td>Problemas recentes de programação, reduzindo contaminação de treino.</td>
+                </tr>
+                <tr>
+                  <td>HumanEval</td>
+                  <td>Geração de funções pequenas com testes unitários.</td>
+                </tr>
+                <tr>
+                  <td>MBPP</td>
+                  <td>Programação básica em Python com tarefas curtas.</td>
+                </tr>
+                <tr>
+                  <td>Codeforces / CodeContests</td>
+                  <td>Raciocínio algorítmico, robustez e resolução competitiva.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tag-row">
+            <span class="tag">llm-stats.com</span>
+            <span class="tag">llm-stats.com/leaderboards/best-ai-for-coding</span>
+            <span class="tag">models.dev</span>
+            <span class="tag">benchmarks internos</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="38">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Treinamento</p>
+          <h2>Cinco trilhas para transformar prática individual em capacidade organizacional.</h2>
+          <div class="matrix">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trilha</th>
+                  <th>Foco</th>
+                  <th>Resultado esperado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AI-Aware Professional</td>
+                  <td>Fundamentos, riscos e uso responsável</td>
+                  <td>Uso seguro no trabalho diário</td>
+                </tr>
+                <tr>
+                  <td>AI-Augmented Developer</td>
+                  <td>SDLC, testes, review e documentação</td>
+                  <td>Entrega assistida com qualidade</td>
+                </tr>
+                <tr>
+                  <td>AI-Native Architect</td>
+                  <td>Arquitetura, RAG, MCPs, governança e plataforma</td>
+                  <td>Decisões escaláveis e auditáveis</td>
+                </tr>
+                <tr>
+                  <td>Agentic Engineering</td>
+                  <td>Agentes, skills, automação e guardrails</td>
+                  <td>Execução controlada de tarefas repetíveis</td>
+                </tr>
+                <tr>
+                  <td>AI Engineering Leadership</td>
+                  <td>Métricas, adoção, valor e mudança organizacional</td>
+                  <td>Capacidade AI-Native sustentável</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="39">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Roadmap interno</p>
+          <h2>Uma evolução em cinco fases.</h2>
+          <div class="grid three">
+            <div class="card compact">
+              <h3>1. Fundação</h3>
+              <p>Política, catálogo aprovado, classificação de dados, papéis, riscos e treinamento inicial.</p>
+            </div>
+            <div class="card compact">
+              <h3>2. Padronização</h3>
+              <p>Templates, checklists, DoR, DoD, prompts, AGENTS.md e padrões mínimos por tipo de projeto.</p>
+            </div>
+            <div class="card compact">
+              <h3>3. Integração</h3>
+              <p>IA conectada ao SDLC: backlog, SDD, repositório, CI, testes, documentação e métricas.</p>
+            </div>
+            <div class="card compact">
+              <h3>4. Agentes controlados</h3>
+              <p>Agentes com branches, PRs, MCPs aprovados, logs, permissões mínimas e revisão humana.</p>
+            </div>
+            <div class="card compact">
+              <h3>5. Escala</h3>
+              <p>Plataforma interna, skills reutilizáveis, gateways, observabilidade, FinOps e benchmark contínuo.</p>
+            </div>
+            <div class="card compact">
+              <h3>Resultado esperado</h3>
+              <p>Mais velocidade com qualidade: adoção segura, evidências, rastreabilidade e aprendizado organizacional.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="40">
+        <div class="slide-inner narrow stagger" style="text-align:center">
+          <p class="eyebrow" style="justify-content:center">Fim</p>
+          <h1 class="display" style="margin-inline:auto">Engenharia aumentada, responsabilidade humana.</h1>
+          <p class="lead" style="margin-inline:auto">
+            O playbook existe para tornar a IA uma capacidade repetível:
+            segura, mensurável, auditável e útil para entregar software melhor.
+          </p>
+          <div class="tag-row" style="justify-content:center">
+            <span class="tag">contexto antes de prompt</span>
+            <span class="tag">teste antes de confiança</span>
+            <span class="tag">valor antes de volume</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      ;(function () {
+        'use strict'
+
+        const slidesWrap = document.getElementById('slidesWrap')
+        const slides = Array.from(slidesWrap.querySelectorAll('.slide'))
+        const progressBar = document.getElementById('progressBar')
+        const btnPrev = document.getElementById('btnPrev')
+        const btnNext = document.getElementById('btnNext')
+        const total = slides.length
+        let current = 1
+        let isAnimating = false
+
+        const dots = []
+        for (let i = 1; i <= total; i++) {
+          const dot = document.createElement('button')
+          dot.className = 'progress-dot'
+          dot.setAttribute('aria-label', `Ir para slide ${i}`)
+          dot.addEventListener('click', () => goTo(i))
+          dots.push(dot)
+          progressBar.appendChild(dot)
+        }
+
+        const counter = document.createElement('div')
+        counter.className = 'progress-counter'
+        progressBar.appendChild(counter)
+
+        const getSlide = (n) =>
+          slides.find((slide) => Number(slide.dataset.slide) === n)
+
+        function updateUI() {
+          dots.forEach((dot, index) =>
+            dot.classList.toggle('active', index + 1 === current),
+          )
+          counter.textContent = `${current} / ${total}`
+          btnPrev.disabled = current === 1
+          btnNext.disabled = current === total
+        }
+
+        function goTo(target, direction) {
+          if (isAnimating || target === current || target < 1 || target > total) {
+            return
+          }
+
+          direction = direction || (target > current ? 'forward' : 'backward')
+
+          const fromEl = getSlide(current)
+          const toEl = getSlide(target)
+
+          isAnimating = true
+          fromEl.classList.remove('active')
+          fromEl.classList.add(direction === 'forward' ? 'exit-up' : 'exit-down')
+
+          toEl.style.cssText = `transform:translateY(${direction === 'forward' ? '56px' : '-56px'});opacity:0;transition:none;`
+          toEl.getBoundingClientRect()
+          toEl.style.cssText = ''
+          toEl.classList.add('active')
+
+          const cleanup = () => {
+            fromEl.classList.remove('exit-up', 'exit-down')
+            isAnimating = false
+          }
+
+          fromEl.addEventListener('transitionend', cleanup, { once: true })
+          setTimeout(cleanup, 520)
+
+          current = target
+          updateUI()
+        }
+
+        const next = () => goTo(current + 1, 'forward')
+        const prev = () => goTo(current - 1, 'backward')
+
+        document.addEventListener('keydown', (event) => {
+          if (['ArrowRight', 'ArrowDown', ' '].includes(event.key)) {
+            event.preventDefault()
+            next()
+          }
+          if (['ArrowLeft', 'ArrowUp'].includes(event.key)) {
+            event.preventDefault()
+            prev()
+          }
+        })
+
+        btnNext.addEventListener('click', next)
+        btnPrev.addEventListener('click', prev)
+
+        let touchStartY = 0
+        slidesWrap.addEventListener(
+          'touchstart',
+          (event) => {
+            touchStartY = event.touches[0].clientY
+          },
+          { passive: true },
+        )
+        slidesWrap.addEventListener(
+          'touchend',
+          (event) => {
+            const dy = event.changedTouches[0].clientY - touchStartY
+            if (Math.abs(dy) > 40) {
+              dy < 0 ? next() : prev()
+            }
+          },
+          { passive: true },
+        )
+
+        updateUI()
+      })()
+    </script>
+  </body>
+</html>

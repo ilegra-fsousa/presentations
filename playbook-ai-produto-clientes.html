@@ -1,0 +1,1694 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI-Native Engineering para Empresas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..750;1,14..32,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js"
+      crossorigin="anonymous"
+      defer
+    ></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #ffffff;
+        --bg-panel: #f8fafc;
+        --bg-surface: #f1f5f9;
+        --text-primary: #101828;
+        --text-secondary: #344054;
+        --text-muted: #667085;
+        --text-subtle: #98a2b3;
+        --purple: #6c5ce7;
+        --blue: #0984e3;
+        --teal: #00a884;
+        --orange: #e17055;
+        --yellow: #f4b740;
+        --red: #d92d20;
+        --accent: #6c5ce7;
+        --border: #e4e7ec;
+        --border-strong: #d0d5dd;
+        --shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(rgba(108, 92, 231, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(9, 132, 227, 0.035) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(circle at 50% 24%, #000 0, transparent 70%);
+      }
+
+      .slides-wrap {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 54px 78px 64px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(56px);
+        transition:
+          opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .slide.active {
+        opacity: 1;
+        pointer-events: all;
+        transform: translateY(0);
+      }
+
+      .slide.exit-up {
+        opacity: 0;
+        transform: translateY(-56px);
+      }
+
+      .slide.exit-down {
+        opacity: 0;
+        transform: translateY(56px);
+      }
+
+      .slide-inner {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 980px;
+      }
+
+      .slide-inner.wide {
+        max-width: 1140px;
+      }
+
+      .slide-inner.narrow {
+        max-width: 760px;
+      }
+
+      .stagger > * {
+        opacity: 0;
+      }
+
+      .slide.active .stagger > * {
+        animation: staggerIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .slide.active .stagger > *:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .slide.active .stagger > *:nth-child(2) {
+        animation-delay: 0.13s;
+      }
+      .slide.active .stagger > *:nth-child(3) {
+        animation-delay: 0.21s;
+      }
+      .slide.active .stagger > *:nth-child(4) {
+        animation-delay: 0.29s;
+      }
+      .slide.active .stagger > *:nth-child(5) {
+        animation-delay: 0.37s;
+      }
+      .slide.active .stagger > *:nth-child(6) {
+        animation-delay: 0.45s;
+      }
+
+      @keyframes staggerIn {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .progress-bar {
+        position: fixed;
+        top: 50%;
+        right: 26px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+        transform: translateY(-50%);
+      }
+
+      .progress-dot {
+        width: 6px;
+        height: 6px;
+        border: 0;
+        border-radius: 50%;
+        background: #d0d5dd;
+        cursor: pointer;
+        transition:
+          background 0.25s,
+          transform 0.25s,
+          box-shadow 0.25s;
+      }
+
+      .progress-dot:hover {
+        background: var(--purple);
+        transform: scale(1.35);
+      }
+
+      .progress-dot.active {
+        background: var(--purple);
+        box-shadow: 0 0 0 5px rgba(108, 92, 231, 0.12);
+        transform: scale(1.35);
+      }
+
+      .progress-counter {
+        margin-top: 8px;
+        color: var(--text-subtle);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+      }
+
+      .nav-arrows {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        z-index: 100;
+        display: flex;
+        gap: 10px;
+        transform: translateX(-50%);
+      }
+
+      .nav-btn {
+        display: flex;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(16, 24, 40, 0.08);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          color 0.2s,
+          border-color 0.2s;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        border-color: rgba(108, 92, 231, 0.35);
+        color: var(--purple);
+        transform: translateY(-1px);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      .footer-note {
+        position: fixed;
+        bottom: 28px;
+        left: 32px;
+        z-index: 80;
+        color: var(--text-subtle);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 18px;
+        color: var(--purple);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--purple);
+      }
+
+      h1.display {
+        max-width: 940px;
+        margin-bottom: 22px;
+        font-size: clamp(42px, 6vw, 82px);
+        font-weight: 760;
+        letter-spacing: -0.04em;
+        line-height: 0.98;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        font-size: clamp(30px, 4vw, 54px);
+        font-weight: 740;
+        letter-spacing: -0.035em;
+        line-height: 1.04;
+      }
+
+      h3 {
+        margin-bottom: 9px;
+        color: var(--text-primary);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      p.lead {
+        max-width: 820px;
+        color: var(--text-secondary);
+        font-size: clamp(18px, 2vw, 24px);
+        line-height: 1.48;
+      }
+
+      p.body {
+        color: var(--text-muted);
+        font-size: 15px;
+        line-height: 1.58;
+      }
+
+      .hero-line {
+        width: min(580px, 72vw);
+        height: 3px;
+        margin: 32px 0 26px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--purple), var(--blue), var(--teal));
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        min-height: 154px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 8px 28px rgba(16, 24, 40, 0.055);
+        padding: 21px;
+      }
+
+      .card.compact {
+        min-height: 112px;
+        padding: 17px;
+      }
+
+      .card.highlight {
+        border-color: rgba(108, 92, 231, 0.25);
+        background: linear-gradient(180deg, rgba(108, 92, 231, 0.075), #fff);
+      }
+
+      .card p,
+      .card li {
+        color: var(--text-muted);
+        font-size: 13.5px;
+        line-height: 1.46;
+      }
+
+      .icon {
+        display: flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border-radius: 9px;
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--purple);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .tag {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        border-radius: 5px;
+        background: rgba(108, 92, 231, 0.08);
+        color: var(--purple);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 6px 10px;
+      }
+
+      .tag.blue {
+        border-color: rgba(9, 132, 227, 0.2);
+        background: rgba(9, 132, 227, 0.08);
+        color: var(--blue);
+      }
+
+      .tag.teal {
+        border-color: rgba(0, 168, 132, 0.2);
+        background: rgba(0, 168, 132, 0.08);
+        color: var(--teal);
+      }
+
+      .tag.orange {
+        border-color: rgba(225, 112, 85, 0.22);
+        background: rgba(225, 112, 85, 0.08);
+        color: var(--orange);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 32px;
+        align-items: center;
+      }
+
+      .check-list {
+        display: grid;
+        gap: 10px;
+        list-style: none;
+      }
+
+      .check-list li {
+        position: relative;
+        padding-left: 26px;
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .check-list li::before {
+        content: '';
+        position: absolute;
+        top: 0.55em;
+        left: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--purple);
+        box-shadow: 0 0 0 5px rgba(108, 92, 231, 0.1);
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .flow span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg-panel);
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 8px 11px;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .phase {
+        min-height: 205px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        padding: 15px;
+      }
+
+      .phase .num {
+        display: inline-flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+        border-radius: 50%;
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--purple);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .phase h3 {
+        min-height: 42px;
+        font-size: 15px;
+      }
+
+      .phase p {
+        color: var(--text-muted);
+        font-size: 12.5px;
+        line-height: 1.42;
+      }
+
+      .matrix {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 10px 34px rgba(16, 24, 40, 0.055);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-size: 13px;
+        line-height: 1.35;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--bg-panel);
+        color: var(--text-primary);
+        font-size: 11px;
+        font-weight: 760;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .stat-card {
+        min-height: 120px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(16, 24, 40, 0.055);
+        padding: 18px;
+      }
+
+      .stat-card .stat-value {
+        margin-bottom: 8px;
+        color: var(--purple);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 23px;
+        font-weight: 700;
+      }
+
+      .stat-card .stat-label {
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .quote {
+        margin-top: 28px;
+        border-left: 4px solid var(--purple);
+        border-radius: 0 10px 10px 0;
+        background: linear-gradient(90deg, rgba(108, 92, 231, 0.08), rgba(9, 132, 227, 0.03));
+        padding: 22px 26px;
+        color: var(--text-primary);
+        font-size: clamp(22px, 3vw, 34px);
+        font-weight: 720;
+        letter-spacing: -0.03em;
+        line-height: 1.18;
+      }
+
+      .code-window {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #101828;
+        box-shadow: var(--shadow);
+      }
+
+      .code-title {
+        display: flex;
+        height: 34px;
+        align-items: center;
+        gap: 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: #1d2939;
+        padding: 0 12px;
+      }
+
+      .code-title span:not(.file) {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ff5f57;
+      }
+
+      .code-title span:nth-child(2) {
+        background: #ffbd2e;
+      }
+
+      .code-title span:nth-child(3) {
+        background: #28c840;
+      }
+
+      .code-title .file {
+        margin-left: 10px;
+        color: #98a2b3;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 17px 18px;
+        color: #e4e7ec;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+
+      @media (max-width: 920px) {
+        .slide {
+          overflow-y: auto;
+          align-items: flex-start;
+          padding: 38px 22px 82px;
+        }
+
+        .progress-bar {
+          right: 12px;
+          gap: 7px;
+        }
+
+        .grid.two,
+        .grid.three,
+        .grid.four,
+        .split,
+        .timeline,
+        .stat-row {
+          grid-template-columns: 1fr;
+        }
+
+        .phase,
+        .phase h3 {
+          min-height: auto;
+        }
+
+        .footer-note {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-bar" id="progressBar" aria-label="Navegação dos slides"></div>
+    <div class="nav-arrows">
+      <button class="nav-btn" id="btnPrev" aria-label="Slide anterior">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+      <button class="nav-btn" id="btnNext" aria-label="Próximo slide">
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+    </div>
+    <div class="footer-note">Use setas, espaço ou swipe</div>
+
+    <div class="slides-wrap" id="slidesWrap">
+      <section class="slide active" data-slide="1">
+        <div class="slide-inner narrow stagger">
+          <p class="eyebrow">ILEGRA AI-NATIVE ENGINEERING</p>
+          <h1 class="display">AI-Native Engineering para empresas</h1>
+          <p class="lead">
+            Uma oferta consultiva para transformar IA em capacidade segura,
+            mensurável e escalável na engenharia de software da sua organização.
+          </p>
+          <div class="hero-line"></div>
+          <div class="tag-row">
+            <span class="tag">AI Engineering</span>
+            <span class="tag blue">consultoria</span>
+            <span class="tag teal">produto e serviço</span>
+            <span class="tag orange">versão 1.0</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="2">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Resumo executivo</p>
+          <h2>Comprar ferramentas não transforma uma empresa em AI-Native.</h2>
+          <p class="lead">
+            O desafio não é apenas disponibilizar Copilot, ChatGPT,
+            Claude, Cursor ou Gemini. É transformar uso disperso em modelo
+            operacional com segurança, qualidade, governança e ROI.
+          </p>
+          <div class="grid three" style="margin-top: 26px">
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <h3>Risco sem método</h3>
+              <p>Shadow AI, vazamento de dados, automações com permissões excessivas e custo sem visibilidade.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-code-branch"></i></div>
+              <h3>Valor sem escala</h3>
+              <p>Ganhos individuais em snippets e autocomplete, mas pouca mudança em fluxo, qualidade ou previsibilidade.</p>
+            </div>
+            <div class="card highlight">
+              <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+              <h3>Capacidade real</h3>
+              <p>Adoção integrada ao SDLC, com contexto, agentes, skills, métricas, FinOps e transferência de conhecimento.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="3">
+        <div class="slide-inner stagger">
+          <p class="eyebrow">Proposta de valor</p>
+          <h2>Da IA informal para uma capacidade corporativa.</h2>
+          <div class="quote">
+            A Ilegra transforma Inteligência Artificial em uma capacidade de
+            engenharia segura, mensurável, integrada ao ciclo de desenvolvimento
+            e orientada a resultados de negócio.
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="4">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Problemas que resolvemos</p>
+          <h2>A pressão por adoção já existe. Falta uma forma segura de escalar.</h2>
+          <div class="grid three">
+            <div class="card compact">
+              <h3>Ferramentas sem valor comprovado</h3>
+              <p>Licenças existem, mas o uso fica restrito a dúvidas, snippets e autocomplete.</p>
+            </div>
+            <div class="card compact">
+              <h3>Uso informal</h3>
+              <p>Contas pessoais, ferramentas não aprovadas e ausência de política de dados.</p>
+            </div>
+            <div class="card compact">
+              <h3>Qualidade inconsistente</h3>
+              <p>Mais código, mas também mais retrabalho, defeitos e manutenção difícil.</p>
+            </div>
+            <div class="card compact">
+              <h3>Legado opaco</h3>
+              <p>Sistemas críticos sem documentação, testes ou mapa de dependências.</p>
+            </div>
+            <div class="card compact">
+              <h3>ROI nebuloso</h3>
+              <p>Produtividade percebida sem baseline, indicadores ou evidências.</p>
+            </div>
+            <div class="card compact">
+              <h3>Agentes sem segurança</h3>
+              <p>Interesse em automação, mas sem sandbox, logs, orçamento ou aprovação humana.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="5">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Visão da solução</p>
+          <h2>Vendor-agnostic, adaptada ao ambiente real da organização.</h2>
+          <p class="lead">
+            A oferta não força uma stack. Ela encaixa IA no ecossistema existente:
+            repositórios, ferramentas de gestão, IDEs, clouds, linguagens,
+            modelos, segurança e processos existentes.
+          </p>
+          <div class="flow">
+            <span>GitHub / GitLab / Bitbucket / Azure DevOps</span>
+            <span>Jira / Confluence / Azure Boards</span>
+            <span>VS Code / Cursor / JetBrains</span>
+            <span>OpenAI / Anthropic / Google / AWS / Microsoft</span>
+            <span>AWS / Azure / GCP / on-premises</span>
+            <span>Java / .NET / Node / Python / Go / legado</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="6">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Cinco dimensões</p>
+          <h2>A transformação precisa cobrir pessoas, processo, tecnologia, governança e métricas.</h2>
+          <div class="grid five"></div>
+          <div class="grid three">
+            <div class="card">
+              <h3>Pessoas</h3>
+              <p>Capacitação, champions, novos papéis, comunidade e mudança de comportamento.</p>
+            </div>
+            <div class="card">
+              <h3>Processos</h3>
+              <p>IA integrada ao discovery, requisitos, desenvolvimento, testes, review, segurança e operação.</p>
+            </div>
+            <div class="card">
+              <h3>Tecnologia</h3>
+              <p>Ferramentas, modelos, gateways, agentes, skills, MCPs, RAG e observabilidade.</p>
+            </div>
+            <div class="card">
+              <h3>Governança</h3>
+              <p>Dados, privacidade, compliance, fornecedores, acesso, auditoria e custos.</p>
+            </div>
+            <div class="card">
+              <h3>Métricas</h3>
+              <p>Produtividade, qualidade, experiência, risco, custo e resultado de negócio.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Resultado</h3>
+              <p>Uma capacidade organizacional, não uma coleção de ferramentas desconectadas.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="7">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Quatro pilares</p>
+          <h2>A abordagem Ilegra equilibra velocidade, qualidade e controle.</h2>
+          <div class="grid four">
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
+              <h3>Contexto e especificação</h3>
+              <p>Requisitos, critérios de aceite, ADRs, contratos, padrões, exemplos e instruções de repositório.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-code"></i></div>
+              <h3>Engenharia e qualidade</h3>
+              <p>Revisão humana, testes, SAST, SCA, secrets scanning, quality gates, rollback e rastreabilidade.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>Governança e segurança</h3>
+              <p>Dados permitidos, ferramentas aprovadas, retenção, acesso, auditoria, risco e mínimo privilégio.</p>
+            </div>
+            <div class="card">
+              <div class="icon"><i class="fa-solid fa-bullseye"></i></div>
+              <h3>Resultados mensuráveis</h3>
+              <p>Tempo de ciclo, time-to-market, qualidade, retrabalho, onboarding, custo, satisfação e valor.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="8">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Maturidade</p>
+          <h2>Uma régua simples para diagnosticar e evoluir a organização.</h2>
+          <div class="timeline">
+            <div class="phase"><span class="num">0</span><h3>Shadow AI</h3><p>Uso individual e descontrolado. Prioridade: política, inventário e proteção de dados.</p></div>
+            <div class="phase"><span class="num">1</span><h3>Tool Adoption</h3><p>Ferramentas licenciadas. Prioridade: capacitação, templates e primeiros indicadores.</p></div>
+            <div class="phase"><span class="num">2</span><h3>Standardized AI SDLC</h3><p>Práticas comuns. Prioridade: integrar IA a requisitos, desenvolvimento, testes e revisão.</p></div>
+            <div class="phase"><span class="num">3</span><h3>Context-Aware Engineering</h3><p>Repos e plataformas dão contexto aos agentes. Prioridade: docs vivas, RAG e contratos.</p></div>
+            <div class="phase"><span class="num">4</span><h3>Agentic Delivery</h3><p>Agentes sob supervisão. Prioridade: sandbox, permissões, logs, avaliações e custos.</p></div>
+            <div class="phase"><span class="num">5</span><h3>AI-Native Platform</h3><p>IA integrada a plataforma, governança e métricas. Prioridade: escala e melhoria contínua.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="9">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 0 — Shadow AI</p>
+          <h2>O uso já acontece, mas fora do radar corporativo.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Profissionais usam contas pessoais, extensões e ferramentas não aprovadas, sem inventário ou política.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Vazamento de dados, propriedade intelectual, custo oculto, ausência de logs e dependência individual.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Mapear uso real, classificar dados, aprovar ferramentas iniciais e criar política mínima.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>AI Engineering Readiness Assessment ou Secure AI Engineering Governance.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="10">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 1 — Tool Adoption</p>
+          <h2>Ferramentas existem, mas o método ainda é individual.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Copilot, ChatGPT, Claude, Cursor ou similares foram contratados, mas cada pessoa usa do seu jeito.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Ganho pontual sem melhoria sistêmica, baixa qualidade de prompts, pouco reaproveitamento e métricas frágeis.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Capacitar squads, criar templates, definir DoR/DoD, champions e primeiros dashboards de adoção.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>AI Coding Enablement, com playbook customizado, prompt library e treinamento.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="11">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 2 — Standardized AI SDLC</p>
+          <h2>A IA começa a entrar no processo real de engenharia.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Há práticas comuns para prompts, review, testes, documentação e uso de IA em algumas fases do SDLC.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Padronização parcial, pouca integração com CI/CD, métricas dispersas e governança ainda manual.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Integrar IA a discovery, requisitos, desenvolvimento, testes, segurança, operação e indicadores.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>AI-Native SDLC Transformation, iniciando por squads-piloto.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="12">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 3 — Context-Aware Engineering</p>
+          <h2>O repositório e a plataforma passam a fornecer contexto estruturado.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Existem AGENTS.md, ADRs, specs, documentação viva, knowledge bases, contratos e exemplos de referência.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Contexto desatualizado, bases sem curadoria, acesso excessivo e respostas sem fonte verificável.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Estruturar RAG corporativo, curadoria, versionamento, MCPs read-only e padrões por domínio.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>AI-Native SDLC Transformation ou AI Product Engineering para bases e copilotos internos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="13">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 4 — Agentic Delivery</p>
+          <h2>Agentes executam tarefas delimitadas sob supervisão.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Agentes refinam backlog, criam testes, atualizam documentação, analisam incidentes ou abrem PRs.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Permissões amplas, custo fora de controle, falha sem rastreabilidade e automação sem aprovação humana.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Sandbox, allowlist, budgets, logs, evals, MCPs aprovados, branch isolada e bloqueio de produção.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>Agentic Software Delivery Pilot com guardrails e relatório de impacto.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="14">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Nível 5 — AI-Native Engineering Platform</p>
+          <h2>IA vira plataforma, governança e melhoria contínua.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Como identificar</h3>
+              <p>Há gateway, catálogo de modelos, skills, agentes, MCPs, observabilidade, FinOps, métricas e comunidade.</p>
+            </div>
+            <div class="card">
+              <h3>Riscos</h3>
+              <p>Complexidade operacional, custo crescente, drift de modelos, skills obsoletas e governança sem ownership.</p>
+            </div>
+            <div class="card">
+              <h3>Próximo movimento</h3>
+              <p>Operar como capacidade contínua: benchmark, FinOps, evals, atualização de playbook e evolução de plataforma.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Caminho sugerido</h3>
+              <p>AI Engineering as a Service, squad especializada ou modelo por capacidade/outcome.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="15">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Portfólio de ofertas</p>
+          <h2>Sete caminhos de adoção para diferentes momentos de maturidade.</h2>
+          <div class="matrix">
+            <table>
+              <thead><tr><th>Oferta</th><th>Quando faz sentido</th><th>Resultado principal</th></tr></thead>
+              <tbody>
+                <tr><td>Readiness Assessment</td><td>A organização quer começar com estratégia e governança.</td><td>Diagnóstico, riscos, roadmap e quick wins.</td></tr>
+                <tr><td>AI Coding Enablement</td><td>A organização já comprou ferramentas, mas ainda não capturou valor.</td><td>Adoção consistente, playbook, prompts, champions e métricas.</td></tr>
+                <tr><td>AI-Native SDLC</td><td>A organização quer integrar IA ao ciclo completo.</td><td>Processo, templates, gates, dashboards e governança.</td></tr>
+                <tr><td>Agentic Delivery Pilot</td><td>A organização quer experimentar agentes com segurança.</td><td>Agentes, skills, MCPs, sandbox, logs e relatório de impacto.</td></tr>
+                <tr><td>Legacy Modernization with AI</td><td>Existem sistemas críticos difíceis de entender e evoluir.</td><td>Code archaeology, testes, documentação e roadmap incremental.</td></tr>
+                <tr><td>Secure AI Governance</td><td>Ambiente regulado, sensível ou com alto risco operacional.</td><td>Framework, matriz de risco, políticas e controles.</td></tr>
+                <tr><td>AI Product Engineering</td><td>A organização quer criar produtos e capacidades com IA.</td><td>RAG, copilotos, agentes, LLMOps, UX e observabilidade.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="16">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 1</p>
+          <h2>AI Engineering Readiness Assessment</h2>
+          <div class="grid three">
+            <div class="card"><h3>Indicado para</h3><p>Empresas que querem adotar IA no desenvolvimento, mas ainda não possuem estratégia ou governança.</p></div>
+            <div class="card"><h3>Atividades</h3><p>Entrevistas, ferramentas existentes, SDLC, segurança, arquitetura, maturidade, gargalos e business case inicial.</p></div>
+            <div class="card"><h3>Entregáveis</h3><p>Diagnóstico, heatmap de riscos, oportunidades, catálogo recomendado, roadmap, quick wins e métricas.</p></div>
+          </div>
+          <div class="tag-row"><span class="tag">2 a 6 semanas</span><span class="tag blue">diagnóstico inicial</span><span class="tag teal">visão executiva</span></div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="17">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 2</p>
+          <h2>AI Coding Enablement</h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Para organizações que já adquiriram Copilot, ChatGPT, Claude, Cursor,
+                Amazon Q ou equivalentes, mas ainda não alcançaram adoção consistente.
+              </p>
+              <div class="tag-row"><span class="tag">4 a 12 semanas</span><span class="tag blue">capacitação</span><span class="tag teal">adoção</span></div>
+            </div>
+            <div class="card">
+              <h3>Entregáveis típicos</h3>
+              <ul class="check-list">
+                <li>Playbook customizado e política de uso.</li>
+                <li>Biblioteca de prompts e templates de AGENTS.md.</li>
+                <li>Skills iniciais, treinamento e champions.</li>
+                <li>Dashboard de adoção e plano de evolução.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="18">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 3</p>
+          <h2>AI-Native SDLC Transformation</h2>
+          <p class="lead">
+            Integra IA ao ciclo completo de engenharia: discovery, requisitos,
+            arquitetura, desenvolvimento, testes, review, segurança, DevOps,
+            documentação e operação.
+          </p>
+          <div class="grid three" style="margin-top: 24px">
+            <div class="card compact"><h3>Escopo</h3><p>Processos, templates por fase, integração com ferramentas e quality gates.</p></div>
+            <div class="card compact"><h3>Entregáveis</h3><p>Playbook corporativo, dashboards, modelo de governança e roadmap de escala.</p></div>
+            <div class="card compact"><h3>Modelo</h3><p>3 a 9 meses, começando por squads-piloto e expandindo gradualmente.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="19">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 4</p>
+          <h2>Agentic Software Delivery Pilot</h2>
+          <div class="grid two">
+            <div class="card">
+              <h3>Possíveis agentes</h3>
+              <ul class="check-list">
+                <li>Refinamento de backlog, geração de testes e documentação.</li>
+                <li>Code review, correções simples e atualização de dependências.</li>
+                <li>Análise de incidentes, modernização de componentes e PRs.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Controles obrigatórios</h3>
+              <ul class="check-list">
+                <li>Sandbox, branch isolada, allowlist e mínimo privilégio.</li>
+                <li>Budget, timeout, logs, aprovação humana e bloqueio de produção.</li>
+                <li>Observabilidade, guardrails e plano de escala.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="tag-row"><span class="tag">6 a 12 semanas</span><span class="tag orange">piloto controlado</span><span class="tag teal">agentes reais</span></div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="20">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 5</p>
+          <h2>Legacy Modernization with AI</h2>
+          <p class="lead">
+            Para monólitos, Java/.NET legado, mainframe, COBOL, Oracle Forms,
+            sistemas sem documentação, APIs antigas e integrações complexas.
+          </p>
+          <div class="flow">
+            <span>code archaeology</span>
+            <span>dependências</span>
+            <span>documentação</span>
+            <span>regras de negócio</span>
+            <span>testes de caracterização</span>
+            <span>vulnerabilidades</span>
+            <span>refatoração assistida</span>
+            <span>validação de equivalência</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="21">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 6</p>
+          <h2>Secure AI Engineering Governance</h2>
+          <div class="grid three">
+            <div class="card"><h3>Indicado para</h3><p>Bancos, seguradoras, saúde, utilities, governo e ambientes regulados.</p></div>
+            <div class="card"><h3>Escopo</h3><p>Política, dados, fornecedores, LGPD, NIST AI RMF, ISO/IEC 42001, OWASP LLM, MCP e FinOps.</p></div>
+            <div class="card"><h3>Entregáveis</h3><p>AI Governance Framework, matriz de risco, catálogo de controles, auditoria e treinamento.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="22">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Oferta 7</p>
+          <h2>AI Product Engineering</h2>
+          <div class="grid two">
+            <div class="card">
+              <h3>Casos de uso</h3>
+              <p>RAG corporativo, copilotos internos, agentes de atendimento, busca inteligente, análise de documentos, portais, suporte técnico, logs e multiagentes.</p>
+            </div>
+            <div class="card">
+              <h3>Capacidades</h3>
+              <p>Arquitetura, model routing, RAG, evals, LLMOps, segurança, observabilidade, UX conversacional, integrações e governança de modelos.</p>
+            </div>
+          </div>
+          <div class="tag-row"><span class="tag blue">novos produtos</span><span class="tag teal">copilotos</span><span class="tag orange">LLMOps</span></div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="23">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Jornada de entrega</p>
+          <h2>Do diagnóstico à otimização contínua.</h2>
+          <div class="timeline">
+            <div class="phase"><span class="num">1</span><h3>Discover</h3><p>Estratégia, dores, ferramentas, dados, processos, restrições, baseline e casos de uso.</p></div>
+            <div class="phase"><span class="num">2</span><h3>Design</h3><p>Arquitetura, modelos, política, controles, métricas, treinamento e pilotos.</p></div>
+            <div class="phase"><span class="num">3</span><h3>Enable</h3><p>Ferramentas, instruções, templates, skills, MCPs, champions e capacitação.</p></div>
+            <div class="phase"><span class="num">4</span><h3>Pilot</h3><p>Projetos reais, uso acompanhado, qualidade, custos, falhas, ajustes e cases.</p></div>
+            <div class="phase"><span class="num">5</span><h3>Scale</h3><p>Expansão para squads, plataforma interna, catálogo, governança e comunidade.</p></div>
+            <div class="phase"><span class="num">6</span><h3>Optimize</h3><p>Modelos, custos, skills, contexto, avaliações, riscos e impacto de negócio.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="24">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 1 — Discover</p>
+          <h2>Entender o ponto de partida antes de desenhar a solução.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Diagnosticar estratégia, dores, maturidade, restrições e oportunidades reais de uso de IA.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Entrevistas, inventário de ferramentas, mapeamento do SDLC, avaliação de dados e baseline.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Mapa de dores, maturidade, riscos, quick wins, casos de uso priorizados e hipótese de business case.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Quais casos de uso têm valor, sponsor, dados permitidos e viabilidade técnica para piloto.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="25">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 2 — Design</p>
+          <h2>Desenhar a solução, os controles e a forma de medir valor.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Transformar oportunidades em desenho operacional, arquitetura e plano de implantação.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Selecionar ferramentas, modelos, arquitetura, políticas, controles, métricas, pilotos e treinamento.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Arquitetura alvo, modelo de governança, plano de métricas, roadmap e desenho dos pilotos.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Ambiente, escopo, responsáveis, riscos e critérios de sucesso aprovados para execução.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="26">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 3 — Enable</p>
+          <h2>Preparar pessoas, repositórios e ferramentas para o piloto.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Habilitar o time para usar IA com contexto, padrões, controles e autonomia responsável.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Configurar ferramentas, criar AGENTS.md, templates, prompts, skills, MCPs, dashboards e champions.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Playbook inicial, materiais de treinamento, repositório acelerador e ambiente pronto para uso.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Squad treinado, ferramentas liberadas, guardrails ativos e backlog do piloto preparado.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="27">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 4 — Pilot</p>
+          <h2>Executar em projetos reais, medir impacto e aprender rápido.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Validar a abordagem em fluxo real, com tarefas reais, métricas reais e riscos controlados.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Acompanhar uso, medir qualidade, custos, falhas, aceitação, retrabalho e satisfação do time.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Relatório de resultados, ajustes no processo, evidências, cases e plano de escala.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Escalar, ajustar ou interromper com base em valor, qualidade, segurança e custo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="28">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 5 — Scale</p>
+          <h2>Expandir para outros times sem perder governança.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Transformar o piloto em capacidade replicável para múltiplos squads, produtos e áreas.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Criar plataforma interna, catálogo, comunidade, governança centralizada, métricas automatizadas e agentes evoluídos.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Modelo de escala, trilhas de treinamento, catálogo de assets, dashboards e operação recorrente.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Definir operating model, orçamento, ownership, cadência de evolução e plano por onda.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="29">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Fase 6 — Optimize</p>
+          <h2>Melhorar continuamente modelos, custos, contexto e resultados.</h2>
+          <div class="grid four">
+            <div class="card">
+              <h3>Objetivo</h3>
+              <p>Manter a capacidade AI-Native atualizada, eficiente, segura e conectada ao valor de negócio.</p>
+            </div>
+            <div class="card">
+              <h3>Atividades</h3>
+              <p>Revisar modelos, custos, skills, prompts, knowledge bases, avaliações, riscos e métricas de negócio.</p>
+            </div>
+            <div class="card">
+              <h3>Entregáveis</h3>
+              <p>Benchmark contínuo, FinOps, backlog de melhorias, atualização de playbook e relatório executivo.</p>
+            </div>
+            <div class="card highlight">
+              <h3>Decisão de avanço</h3>
+              <p>Priorizar novas capacidades, descontinuar o que não gera valor e ampliar o que funciona.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="30">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Arquitetura de referência</p>
+          <h2>Uma implantação corporativa conecta experiência, modelos, governança e operação.</h2>
+          <div class="grid three">
+            <div class="card"><h3>Experiência</h3><p>IDEs, interfaces de trabalho, agentes de desenvolvimento, portais internos e copilotos.</p></div>
+            <div class="card"><h3>Plataforma</h3><p>Gateway de modelos, catálogo aprovado, Identity Provider, Secrets Manager, MCP Gateway e RAG.</p></div>
+            <div class="card"><h3>Operação</h3><p>CI/CD, SAST, SCA, secrets scanning, observabilidade, auditoria, custos e sandboxes.</p></div>
+          </div>
+          <div class="flow">
+            <span>IDE</span><span>Agente</span><span>Gateway</span><span>Modelos</span><span>MCPs</span><span>RAG</span><span>CI/CD</span><span>Observabilidade</span><span>Auditoria</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="31">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Gateway corporativo</p>
+          <h2>O gateway é recomendado quando há múltiplos times, providers ou requisitos regulatórios.</h2>
+          <div class="grid four">
+            <div class="card compact"><h3>Controle</h3><p>Chaves, providers, modelos aprovados, rate limit, budgets e bloqueios.</p></div>
+            <div class="card compact"><h3>Segurança</h3><p>Mascaramento, políticas, retenção, egress control e auditoria.</p></div>
+            <div class="card compact"><h3>Operação</h3><p>Fallback, cache, roteamento, logs, custo por squad e observabilidade.</p></div>
+            <div class="card compact"><h3>Exemplos</h3><p>LiteLLM, Portkey, Helicone AI Gateway, OpenRouter e gateway interno.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="32">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Guardrails</p>
+          <h2>Nenhum agente deve possuir acesso irrestrito.</h2>
+          <div class="grid three">
+            <ul class="check-list card">
+              <li>SSO, RBAC e identidade por agente.</li>
+              <li>Credenciais temporárias e mínimo privilégio.</li>
+              <li>Segregação de ambientes e branch protection.</li>
+            </ul>
+            <ul class="check-list card">
+              <li>Aprovação obrigatória e allowlist de ferramentas.</li>
+              <li>Limite de iterações, custo, timeout e kill switch.</li>
+              <li>Egress control, DLP e secrets scanning.</li>
+            </ul>
+            <ul class="check-list card">
+              <li>Auditoria, logs e retenção configurável.</li>
+              <li>Avaliações contínuas e resposta a incidentes.</li>
+              <li>Bloqueio de ações destrutivas e produção.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="33">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Métricas e ROI</p>
+          <h2>Provar valor exige baseline, piloto e indicadores de negócio.</h2>
+          <div class="grid three">
+            <div class="card"><h3>Baseline</h3><p>Cycle time, lead time, review, throughput, defeitos, incidentes, cobertura, onboarding, documentação, custo e satisfação.</p></div>
+            <div class="card"><h3>Piloto</h3><p>Adoção, frequência de uso, atividades apoiadas, tempo por tarefa, outputs aceitos/rejeitados, retrabalho, qualidade e tokens.</p></div>
+            <div class="card"><h3>Negócio</h3><p>Time-to-market, retrabalho, falhas, custo operacional, modernização, previsibilidade, experiência e receita habilitada.</p></div>
+          </div>
+          <div class="quote" style="font-size: clamp(18px, 2.1vw, 26px)">
+            Benefício líquido = tempo recuperado + perdas evitadas + valor antecipado - licenças - consumo - implantação - treinamento - operação.
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="34">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Modelos de contratação</p>
+          <h2>A iniciativa pode começar por diagnóstico, implantação, squad especializada ou serviço recorrente.</h2>
+          <div class="grid four">
+            <div class="card"><h3>Assessment fechado</h3><p>Escopo e prazo definidos para diagnóstico, riscos, roadmap e business case.</p></div>
+            <div class="card"><h3>Projeto de implantação</h3><p>Escopo fechado ou progressivo, com entregáveis, marcos e squads-piloto.</p></div>
+            <div class="card"><h3>Squad especializada</h3><p>Product Lead, arquiteto de IA, tech lead, AI engineer, DevOps e segurança.</p></div>
+            <div class="card"><h3>AI Engineering as a Service</h3><p>Governança, modelos, playbook, skills, agentes, avaliações, métricas e FinOps.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="35">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Demonstrações</p>
+          <h2>Demonstrações ajudam a tangibilizar a solução.</h2>
+          <div class="grid two">
+            <div class="card"><h3>Da issue ao PR governado</h3><p>Issue, refinamento, critérios, proposta técnica, aprovação, branch, código, testes, pipeline, review, SAST/SCA e documentação.</p></div>
+            <div class="card"><h3>Modernização de legado</h3><p>Análise, módulos, documentação, dependências, testes de caracterização, riscos, ADR, refatoração e validação.</p></div>
+            <div class="card"><h3>Portal de desenvolvedores</h3><p>Pergunta, consulta à documentação, fontes, payload, erro, correção, exemplos por linguagem e checklist.</p></div>
+            <div class="card"><h3>QA assistido por IA</h3><p>Story, ambiguidades, cenários, API, E2E, massa de dados, execução, evidências, falhas e cobertura.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="36">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Diferenciais</p>
+          <h2>Foco em engenharia real, não em demonstrações isoladas.</h2>
+          <div class="grid three">
+            <div class="card"><h3>Vendor-agnostic</h3><p>Opera com modelos proprietários, open-weight, múltiplos providers e ferramentas existentes da organização.</p></div>
+            <div class="card"><h3>Engenharia + segurança</h3><p>Arquitetura, cloud, SDLC, qualidade, LGPD by design, SDD e agentes controlados.</p></div>
+            <div class="card"><h3>Aceleradores</h3><p>Playbooks, templates, skills, MCPs, agentes, prompts, dashboards e repositórios de referência.</p></div>
+            <div class="card"><h3>Transferência</h3><p>Capacitação, champions, comunidade, governança e evolução contínua com a organização.</p></div>
+            <div class="card"><h3>Legado e escala</h3><p>Modernização incremental, documentação viva, testes e adoção por squads.</p></div>
+            <div class="card"><h3>ROI mensurável</h3><p>Baseline, métricas, FinOps, qualidade, risco e valor de negócio acompanhados desde o piloto.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="37">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Discovery inicial</p>
+          <h2>Perguntas para orientar o diagnóstico.</h2>
+          <div class="matrix">
+            <table>
+              <thead><tr><th>Dimensão</th><th>Perguntas-chave</th></tr></thead>
+              <tbody>
+                <tr><td>Estratégia</td><td>Qual problema deseja resolver? Produtividade, qualidade, modernização ou novos produtos? Há sponsor e budget?</td></tr>
+                <tr><td>Pessoas</td><td>Quantos profissionais usarão IA? Quais perfis? Existem champions? Como funciona o treinamento?</td></tr>
+                <tr><td>Processos</td><td>Onde estão gargalos do SDLC? Como requisitos, reviews, testes e métricas são tratados?</td></tr>
+                <tr><td>Tecnologia</td><td>Quais IDEs, repositórios, clouds, stacks, CI/CD, segurança e ferramentas de IA já existem?</td></tr>
+                <tr><td>Segurança</td><td>Há dados regulados? Restrições de residência? SSO/SCIM? Modelos externos são permitidos?</td></tr>
+                <tr><td>Operação</td><td>Quem aprova ferramentas? Como custos, logs, incidentes e atualizações são controlados?</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="38">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Dúvidas frequentes</p>
+          <h2>As dúvidas mais comuns têm respostas objetivas.</h2>
+          <div class="grid two">
+            <div class="card"><h3>“Já temos Copilot.”</h3><p>Licença não é capacidade organizacional. A Ilegra transforma ferramenta em processo, contexto, treinamento, governança e métricas.</p></div>
+            <div class="card"><h3>“Isso é seguro?”</h3><p>Pode ser inseguro sem controles. Por isso começamos por dados, fornecedores, acessos, logs, políticas e aprovação humana.</p></div>
+            <div class="card"><h3>“Como provar retorno?”</h3><p>Registramos baseline e comparamos fluxo, qualidade, custos, retrabalho, satisfação e resultados de negócio.</p></div>
+            <div class="card"><h3>“Não queremos modelos públicos.”</h3><p>Podemos usar contratos enterprise, gateways, cloud privada, modelos open-weight ou execução controlada conforme o risco.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="39">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Casos por segmento</p>
+          <h2>A solução se adapta ao risco e ao objetivo de cada indústria.</h2>
+          <div class="grid three">
+            <div class="card compact"><h3>Serviços financeiros</h3><p>Modernização, testes, documentação, segurança, compliance e análise de legado.</p></div>
+            <div class="card compact"><h3>Saúde</h3><p>Governança, privacidade, documentação, integrações, qualidade e rastreabilidade.</p></div>
+            <div class="card compact"><h3>Utilities e indústria</h3><p>Modernização operacional, integrações, incidentes e documentação de ativos.</p></div>
+            <div class="card compact"><h3>Varejo</h3><p>Produtos digitais, testes, personalização, atendimento e automação de operações.</p></div>
+            <div class="card compact"><h3>Governo</h3><p>Sistemas legados, governança, transparência, documentação e segurança.</p></div>
+            <div class="card compact"><h3>Tecnologia e SaaS</h3><p>AI-Native SDLC, agentes, automação, suporte técnico e plataforma.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="40">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Entregáveis padrão</p>
+          <h2>Um kit reutilizável que vira patrimônio da organização.</h2>
+          <div class="flow">
+            <span>relatório de maturidade</span>
+            <span>roadmap</span>
+            <span>business case</span>
+            <span>política de IA</span>
+            <span>matriz de risco</span>
+            <span>catálogo de ferramentas</span>
+            <span>arquitetura</span>
+            <span>playbook customizado</span>
+            <span>templates</span>
+            <span>prompts</span>
+            <span>skills</span>
+            <span>agentes</span>
+            <span>MCPs</span>
+            <span>repositório acelerador</span>
+            <span>treinamentos</span>
+            <span>dashboard</span>
+            <span>governança</span>
+            <span>relatório de piloto</span>
+            <span>plano de escala</span>
+            <span>case executivo</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="41">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">Critérios de sucesso</p>
+          <h2>Uma iniciativa bem-sucedida resolve problema real e pode escalar com segurança.</h2>
+          <div class="grid three">
+            <ul class="check-list card"><li>Resolve problema real e possui sponsor.</li><li>Possui baseline e métricas.</li><li>É utilizada pelos profissionais.</li></ul>
+            <ul class="check-list card"><li>Mantém ou melhora qualidade.</li><li>Não cria incidentes de segurança.</li><li>Apresenta custo controlado.</li></ul>
+            <ul class="check-list card"><li>Gera resultado mensurável.</li><li>É reproduzível e escalável.</li><li>Transfere conhecimento para a organização.</li></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="42">
+        <div class="slide-inner wide stagger">
+          <p class="eyebrow">One-page da oferta</p>
+          <h2>AI-Native Engineering</h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Acelere o desenvolvimento de software com Inteligência Artificial
+                sem abrir mão de governança, segurança e qualidade.
+              </p>
+              <div class="tag-row">
+                <span class="tag">Assessment</span>
+                <span class="tag blue">Enablement</span>
+                <span class="tag teal">Agentic Delivery</span>
+                <span class="tag orange">AI Product Engineering</span>
+              </div>
+            </div>
+            <div class="card highlight">
+              <h3>Resultados esperados</h3>
+              <ul class="check-list">
+                <li>Menor tempo de ciclo e maior previsibilidade.</li>
+                <li>Melhor qualidade, menos retrabalho e documentação viva.</li>
+                <li>Modernização mais rápida e onboarding acelerado.</li>
+                <li>Governança de IA e resultado mensurável.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="43">
+        <div class="slide-inner narrow stagger" style="text-align:center">
+          <p class="eyebrow" style="justify-content:center">Mensagem final</p>
+          <h1 class="display" style="margin-inline:auto">IA como capacidade, não como ferramenta isolada.</h1>
+          <p class="lead" style="margin-inline:auto">
+            A Ilegra combina estratégia, engenharia, arquitetura, cloud, dados,
+            segurança e agentes para modernizar o ciclo de desenvolvimento de software.
+          </p>
+          <div class="hero-line" style="margin-inline:auto"></div>
+          <div class="tag-row" style="justify-content:center">
+            <span class="tag">segura</span>
+            <span class="tag blue">mensurável</span>
+            <span class="tag teal">escalável</span>
+            <span class="tag orange">orientada a negócio</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      ;(function () {
+        'use strict'
+
+        const slidesWrap = document.getElementById('slidesWrap')
+        const slides = Array.from(slidesWrap.querySelectorAll('.slide'))
+        const progressBar = document.getElementById('progressBar')
+        const btnPrev = document.getElementById('btnPrev')
+        const btnNext = document.getElementById('btnNext')
+        const total = slides.length
+        let current = 1
+        let isAnimating = false
+
+        const dots = []
+        for (let i = 1; i <= total; i++) {
+          const dot = document.createElement('button')
+          dot.className = 'progress-dot'
+          dot.setAttribute('aria-label', `Ir para slide ${i}`)
+          dot.addEventListener('click', () => goTo(i))
+          dots.push(dot)
+          progressBar.appendChild(dot)
+        }
+
+        const counter = document.createElement('div')
+        counter.className = 'progress-counter'
+        progressBar.appendChild(counter)
+
+        const getSlide = (n) => slides.find((slide) => Number(slide.dataset.slide) === n)
+
+        function updateUI() {
+          dots.forEach((dot, index) => dot.classList.toggle('active', index + 1 === current))
+          counter.textContent = `${current} / ${total}`
+          btnPrev.disabled = current === 1
+          btnNext.disabled = current === total
+        }
+
+        function goTo(target, direction) {
+          if (isAnimating || target === current || target < 1 || target > total) return
+          direction = direction || (target > current ? 'forward' : 'backward')
+
+          const fromEl = getSlide(current)
+          const toEl = getSlide(target)
+
+          isAnimating = true
+          fromEl.classList.remove('active')
+          fromEl.classList.add(direction === 'forward' ? 'exit-up' : 'exit-down')
+
+          toEl.style.cssText = `transform:translateY(${direction === 'forward' ? '56px' : '-56px'});opacity:0;transition:none;`
+          toEl.getBoundingClientRect()
+          toEl.style.cssText = ''
+          toEl.classList.add('active')
+
+          const cleanup = () => {
+            fromEl.classList.remove('exit-up', 'exit-down')
+            isAnimating = false
+          }
+
+          fromEl.addEventListener('transitionend', cleanup, { once: true })
+          setTimeout(cleanup, 520)
+
+          current = target
+          updateUI()
+        }
+
+        const next = () => goTo(current + 1, 'forward')
+        const prev = () => goTo(current - 1, 'backward')
+
+        document.addEventListener('keydown', (event) => {
+          if (['ArrowRight', 'ArrowDown', ' '].includes(event.key)) {
+            event.preventDefault()
+            next()
+          }
+          if (['ArrowLeft', 'ArrowUp'].includes(event.key)) {
+            event.preventDefault()
+            prev()
+          }
+        })
+
+        btnNext.addEventListener('click', next)
+        btnPrev.addEventListener('click', prev)
+
+        let touchStartY = 0
+        slidesWrap.addEventListener(
+          'touchstart',
+          (event) => {
+            touchStartY = event.touches[0].clientY
+          },
+          { passive: true },
+        )
+        slidesWrap.addEventListener(
+          'touchend',
+          (event) => {
+            const dy = event.changedTouches[0].clientY - touchStartY
+            if (Math.abs(dy) > 40) {
+              dy < 0 ? next() : prev()
+            }
+          },
+          { passive: true },
+        )
+
+        updateUI()
+      })()
+    </script>
+  </body>
+</html>
