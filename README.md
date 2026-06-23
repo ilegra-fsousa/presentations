@@ -22,6 +22,12 @@ Apresentação client-facing da oferta Ilegra para empresas: maturidade, jornada
 
 O arquivo `index.html` funciona como landing page do projeto e referencia as duas apresentações principais.
 
+Quando publicado via GitHub Pages, o site fica disponível em:
+
+```text
+https://ilegra-fsousa.github.io/presentations/
+```
+
 Para abrir localmente, basta acessar:
 
 ```text
